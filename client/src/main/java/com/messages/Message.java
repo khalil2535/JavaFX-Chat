@@ -33,11 +33,12 @@ public class Message implements Serializable {
     }
 
     public String getMsg() {
-
+        //TODO decrypt here
         return msg;
     }
 
     public void setMsg(String msg) {
+        //TODO encrypt here
         this.msg = msg;
     }
 

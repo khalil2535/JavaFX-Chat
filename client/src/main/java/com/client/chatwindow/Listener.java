@@ -63,9 +63,6 @@ public class Listener implements Runnable{
                         case USER:
                             controller.addToChat(message);
                             break;
-                        case VOICE:
-                            controller.addToChat(message);
-                            break;
                         case NOTIFICATION:
                             controller.newUserNotification(message);
                             break;
@@ -104,19 +101,6 @@ public class Listener implements Runnable{
         oos.flush();
     }
 
-    /* This method is used for sending a voice Message
- * @param msg - The message which the user generates
- */
-    public static void sendVoiceMessage(byte[] audio) throws IOException {
-        Message createMessage = new Message();
-        createMessage.setName(username);
-        createMessage.setType(MessageType.VOICE);
-        createMessage.setStatus(Status.AWAY);
-        createMessage.setVoiceMsg(audio);
-        createMessage.setPicture(picture);
-        oos.writeObject(createMessage);
-        oos.flush();
-    }
 
     /* This method is used for sending a normal Message
  * @param msg - The message which the user generates

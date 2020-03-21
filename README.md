@@ -21,12 +21,12 @@ Notifications using Tray-Notifications Library
   <li>MOTD on Connect</li>
   <li>Connected Userlist</li>
   <li>Basic Animation</li>
+  <li>Able to Set Status (Away / Busy / Online)</li>
 </ul>
 <h3> TODO </h3>
 <ul>
   <li>Profile Picture (<strike>Presets</strike> / Upload)</li>
-  <li><strike>Able to Set Status (Away / Busy / Online)</strike></li>
-  <li><strike>Voice Communication</strike></li>
+  <li>Voice Communication</li>
   <li>Sounds & External CSS</li>
   <li>Server GUI</li>
 </ul>

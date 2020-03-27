@@ -10,6 +10,28 @@ import javafx.stage.StageStyle;
 public class CustomStage extends Stage {
 
     private final Location bottomRight;
+    private SimpleDoubleProperty xLocationProperty = new SimpleDoubleProperty() {
+        @Override
+        public void set(double newValue) {
+            setX(newValue);
+        }
+
+        @Override
+        public double get() {
+            return getX();
+        }
+    };
+    private SimpleDoubleProperty yLocationProperty = new SimpleDoubleProperty() {
+        @Override
+        public void set(double newValue) {
+            setY(newValue);
+        }
+
+        @Override
+        public double get() {
+            return getY();
+        }
+    };
 
     public CustomStage(AnchorPane ap, StageStyle style) {
         initStyle(style);
@@ -20,7 +42,7 @@ public class CustomStage extends Stage {
         double x = screenBounds.getMinX() + screenBounds.getWidth() - ap.getPrefWidth() - 2;
         double y = screenBounds.getMinY() + screenBounds.getHeight() - ap.getPrefHeight() - 2;
 
-        bottomRight = new Location(x,y);
+        bottomRight = new Location(x, y);
     }
 
     public Location getBottomRight() {
@@ -43,33 +65,9 @@ public class CustomStage extends Stage {
         setY(loc.getY());
     }
 
-    private SimpleDoubleProperty xLocationProperty = new SimpleDoubleProperty() {
-        @Override
-        public void set(double newValue) {
-            setX(newValue);
-        }
-
-        @Override
-        public double get() {
-            return getX();
-        }
-    };
-
     public SimpleDoubleProperty xLocationProperty() {
         return xLocationProperty;
     }
-
-    private SimpleDoubleProperty yLocationProperty = new SimpleDoubleProperty() {
-        @Override
-        public void set(double newValue) {
-            setY(newValue);
-        }
-
-        @Override
-        public double get() {
-            return getY();
-        }
-    };
 
     public SimpleDoubleProperty yLocationProperty() {
         return yLocationProperty;

@@ -14,14 +14,17 @@ public class Message implements Serializable {
     private ArrayList<User> users;
 
     private Status status;
+    private String picture;
+
+    public Message() {
+    }
 
     public String getPicture() {
         return picture;
     }
 
-    private String picture;
-
-    public Message() {
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public String getName() {
@@ -58,18 +61,13 @@ public class Message implements Serializable {
         this.list = new ArrayList<>(userList.values());
     }
 
-    public void setOnlineCount(int count){
-        this.count = count;
-    }
-
-    public int getOnlineCount(){
+    public int getOnlineCount() {
         return this.count;
     }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
+    public void setOnlineCount(int count) {
+        this.count = count;
     }
-
 
     public ArrayList<User> getUsers() {
         return users;
@@ -79,12 +77,12 @@ public class Message implements Serializable {
         this.users = users;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-
     public Status getStatus() {
         return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
 }

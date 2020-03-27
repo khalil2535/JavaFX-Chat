@@ -13,6 +13,14 @@ public class MainLauncher extends Application {
 
     private static Stage primaryStageObj;
 
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    public static Stage getPrimaryStage() {
+        return primaryStageObj;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         primaryStageObj = primaryStage;
@@ -26,14 +34,5 @@ public class MainLauncher extends Application {
         primaryStage.setScene(mainScene);
         primaryStage.show();
         primaryStage.setOnCloseRequest(e -> Platform.exit());
-    }
-
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    public static Stage getPrimaryStage() {
-        return primaryStageObj;
     }
 }

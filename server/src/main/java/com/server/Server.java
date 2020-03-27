@@ -21,9 +21,9 @@ public class Server {
     /* Setting up variables */
     private static final int PORT = 9001;
     private static final HashMap<String, User> names = new HashMap<>();
+    static Logger logger = LoggerFactory.getLogger(Server.class);
     private static HashSet<ObjectOutputStream> writers = new HashSet<>();
     private static ArrayList<User> users = new ArrayList<>();
-    static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) throws Exception {
         logger.info("The chat server is running.");
@@ -88,9 +88,9 @@ public class Server {
                 }
             } catch (SocketException socketException) {
                 logger.error("Socket Exception for user " + name);
-            } catch (DuplicateUsernameException duplicateException){
+            } catch (DuplicateUsernameException duplicateException) {
                 logger.error("Duplicate Username : " + name);
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.error("Exception in run() method for user: " + name, e);
             } finally {
                 closeConnections();
@@ -179,36 +179,36 @@ public class Server {
         /*
          * Once a user has been disconnected, we close the open connections and remove the writers
          */
-        private synchronized void closeConnections()  {
+        private synchronized void closeConnections() {
             logger.debug("closeConnections() method Enter");
             logger.info("HashMap names:" + names.size() + " writers:" + writers.size() + " usersList size:" + users.size());
             if (name != null) {
                 names.remove(name);
                 logger.info("User: " + name + " has been removed!");
             }
-            if (user != null){
+            if (user != null) {
                 users.remove(user);
                 logger.info("User object: " + user + " has been removed!");
             }
-            if (output != null){
+            if (output != null) {
                 writers.remove(output);
                 logger.info("Writer object: " + user + " has been removed!");
             }
-            if (is != null){
+            if (is != null) {
                 try {
                     is.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if (os != null){
+            if (os != null) {
                 try {
                     os.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if (input != null){
+            if (input != null) {
                 try {
                     input.close();
                 } catch (IOException e) {

@@ -39,9 +39,10 @@ public final class TrayNotification {
 
     /**
      * Initializes an instance of the tray notification object
-     * @param title The title text to assign to the tray
-     * @param body The body text to assign to the tray
-     * @param img The image to show on the tray
+     *
+     * @param title         The title text to assign to the tray
+     * @param body          The body text to assign to the tray
+     * @param img           The image to show on the tray
      * @param rectangleFill The fill for the rectangle
      */
     public TrayNotification(String title, String body, Image img, Paint rectangleFill) {
@@ -53,11 +54,12 @@ public final class TrayNotification {
 
     /**
      * Initializes an instance of the tray notification object
-     * @param title The title text to assign to the tray
-     * @param body The body text to assign to the tray
+     *
+     * @param title            The title text to assign to the tray
+     * @param body             The body text to assign to the tray
      * @param notificationType The notification type to assign to the tray
      */
-    public TrayNotification(String title, String body, NotificationType notificationType ) {
+    public TrayNotification(String title, String body, NotificationType notificationType) {
         initTrayNotification(title, body, notificationType);
     }
 
@@ -89,7 +91,7 @@ public final class TrayNotification {
     private void initAnimations() {
 
         animationProvider =
-            new AnimationProvider(new FadeAnimation(stage), new SlideAnimation(stage), new PopupAnimation(stage));
+                new AnimationProvider(new FadeAnimation(stage), new SlideAnimation(stage), new PopupAnimation(stage));
 
         //Default animation type
         setAnimationType(AnimationType.SLIDE);
@@ -103,6 +105,10 @@ public final class TrayNotification {
         stage.setLocation(stage.getBottomRight());
 
         lblClose.setOnMouseClicked(e -> dismiss());
+    }
+
+    public NotificationType getNotificationType() {
+        return notificationType;
     }
 
     public void setNotificationType(NotificationType nType) {
@@ -148,10 +154,6 @@ public final class TrayNotification {
         setTrayIcon(imageIcon.getImage());
     }
 
-    public NotificationType getNotificationType() {
-        return notificationType;
-    }
-
     public void setTray(String title, String message, NotificationType type) {
         setTitle(title);
         setMessage(message);
@@ -172,6 +174,7 @@ public final class TrayNotification {
 
     /**
      * Shows and dismisses the tray notification
+     *
      * @param dismissDelay How long to delay the start of the dismiss animation
      */
     public void showAndDismiss(Duration dismissDelay) {
@@ -193,7 +196,7 @@ public final class TrayNotification {
      */
     public void showAndWait() {
 
-        if (! isTrayShowing()) {
+        if (!isTrayShowing()) {
             stage.show();
 
             animator.playShowAnimation();
@@ -225,27 +228,20 @@ public final class TrayNotification {
 
     /**
      * Sets an action event for when the tray has been dismissed
+     *
      * @param event The event to occur when the tray has been dismissed
      */
     public void setOnDismiss(EventHandler<ActionEvent> event) {
-        onDismissedCallBack  = event;
+        onDismissedCallBack = event;
     }
 
     /**
      * Sets an action event for when the tray has been shown
+     *
      * @param event The event to occur after the tray has been shown
      */
     public void setOnShown(EventHandler<ActionEvent> event) {
-        onShownCallback  = event;
-    }
-
-    /**
-     * Sets a new task bar image for the tray
-     * @param img The image to assign
-     */
-    public void setTrayIcon(Image img) {
-        stage.getIcons().clear();
-        stage.getIcons().add(img);
+        onShownCallback = event;
     }
 
     public Image getTrayIcon() {
@@ -253,11 +249,13 @@ public final class TrayNotification {
     }
 
     /**
-     * Sets a title to the tray
-     * @param txt The text to assign to the tray icon
+     * Sets a new task bar image for the tray
+     *
+     * @param img The image to assign
      */
-    public void setTitle(String txt) {
-        lblTitle.setText(txt);
+    public void setTrayIcon(Image img) {
+        stage.getIcons().clear();
+        stage.getIcons().add(img);
     }
 
     public String getTitle() {
@@ -265,42 +263,52 @@ public final class TrayNotification {
     }
 
     /**
-     * Sets the message for the tray notification
-     * @param txt The text to assign to the body of the tray notification
+     * Sets a title to the tray
+     *
+     * @param txt The text to assign to the tray icon
      */
-    public void setMessage(String txt) {
-        lblMessage.setText(txt);
+    public void setTitle(String txt) {
+        lblTitle.setText(txt);
     }
 
     public String getMessage() {
         return lblMessage.getText();
     }
 
-    public void setImage (Image img) {
-        imageIcon.setImage(img);
-
-        setTrayIcon(img);
+    /**
+     * Sets the message for the tray notification
+     *
+     * @param txt The text to assign to the body of the tray notification
+     */
+    public void setMessage(String txt) {
+        lblMessage.setText(txt);
     }
 
     public Image getImage() {
         return imageIcon.getImage();
     }
 
-    public void setRectangleFill(Paint value) {
-        rectangleColor.setFill(value);
+    public void setImage(Image img) {
+        imageIcon.setImage(img);
+
+        setTrayIcon(img);
     }
 
     public Paint getRectangleFill() {
         return rectangleColor.getFill();
     }
 
-    public void setAnimationType(AnimationType type) {
-        animator = animationProvider.findFirstWhere(a -> a.getAnimationType() == type);
-
-        animationType = type;
+    public void setRectangleFill(Paint value) {
+        rectangleColor.setFill(value);
     }
 
     public AnimationType getAnimationType() {
         return animationType;
+    }
+
+    public void setAnimationType(AnimationType type) {
+        animator = animationProvider.findFirstWhere(a -> a.getAnimationType() == type);
+
+        animationType = type;
     }
 }

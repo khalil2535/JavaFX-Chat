@@ -7,7 +7,7 @@ package com.exception;
  * Github: www.github.com/DomHeal
  */
 public class DuplicateUsernameException extends Exception {
-    public DuplicateUsernameException(String message){
+    public DuplicateUsernameException(String message) {
         super(message);
     }
 }

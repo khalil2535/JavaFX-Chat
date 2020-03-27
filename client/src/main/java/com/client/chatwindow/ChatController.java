@@ -43,20 +43,27 @@ import java.util.ResourceBundle;
 
 public class ChatController implements Initializable {
 
-    @FXML private TextArea messageBox;
-    @FXML private Label usernameLabel;
-    @FXML private Label onlineCountLabel;
-    @FXML private ListView userList;
-    @FXML private ImageView userImageView;
-    @FXML ListView chatPane;
-    @FXML ListView statusList;
-    @FXML BorderPane borderPane;
-    @FXML ComboBox statusComboBox;
-
+    @FXML
+    ListView chatPane;
+    @FXML
+    ListView statusList;
+    @FXML
+    BorderPane borderPane;
+    @FXML
+    ComboBox statusComboBox;
+    Logger logger = LoggerFactory.getLogger(ChatController.class);
+    @FXML
+    private TextArea messageBox;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private Label onlineCountLabel;
+    @FXML
+    private ListView userList;
+    @FXML
+    private ImageView userImageView;
     private double xOffset;
     private double yOffset;
-    Logger logger = LoggerFactory.getLogger(ChatController.class);
-
 
     public void sendButtonAction() throws IOException {
         String msg = messageBox.getText();
@@ -77,11 +84,11 @@ public class ChatController implements Initializable {
                 profileImage.setFitWidth(32);
                 BubbledLabel bl6 = new BubbledLabel();
                 bl6.setText(msg.getName() + ": " + msg.getMsg());
-                bl6.setBackground(new Background(new BackgroundFill(Color.WHITE,null, null)));
+                bl6.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
                 HBox x = new HBox();
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
                 x.getChildren().addAll(profileImage, bl6);
-                logger.debug("ONLINE USERS: " + Integer.toString(msg.getUserlist().size()));
+                logger.debug("ONLINE USERS: " + msg.getUserlist().size());
                 setOnlineLabel(Integer.toString(msg.getOnlineCount()));
                 return x;
             }
@@ -125,6 +132,7 @@ public class ChatController implements Initializable {
             t.start();
         }
     }
+
     public void setUsernameLabel(String username) {
         this.usernameLabel.setText(username);
     }
@@ -151,7 +159,7 @@ public class ChatController implements Initializable {
     /* Displays Notification when a user joins */
     public void newUserNotification(Message msg) {
         Platform.runLater(() -> {
-            Image profileImg = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() +".png").toString(),50,50,false,false);
+            Image profileImg = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() + ".png").toString(), 50, 50, false, false);
             TrayNotification tray = new TrayNotification();
             tray.setTitle("A new user has joined!");
             tray.setMessage(msg.getName() + " has joined the JavaFX Chatroom!");
@@ -214,7 +222,7 @@ public class ChatController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-                /* Drag and Drop */
+        /* Drag and Drop */
         borderPane.setOnMousePressed(event -> {
             xOffset = MainLauncher.getPrimaryStage().getX() - event.getScreenX();
             yOffset = MainLauncher.getPrimaryStage().getY() - event.getScreenY();

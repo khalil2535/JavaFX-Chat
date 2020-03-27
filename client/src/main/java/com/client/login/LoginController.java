@@ -31,24 +31,32 @@ import java.util.Random;
 import java.util.ResourceBundle;
 
 /**
- *  Created by Dominic on 12-Nov-15.
+ * Created by Dominic on 12-Nov-15.
  */
 public class LoginController implements Initializable {
-    @FXML private ImageView Defaultview;
-    @FXML private ImageView Sarahview;
-    @FXML private ImageView Dominicview;
-    @FXML public  TextField hostnameTextfield;
-    @FXML private TextField portTextfield;
-    @FXML private TextField usernameTextfield;
-    @FXML private ChoiceBox imagePicker;
-    @FXML private Label selectedPicture;
     public static ChatController con;
-    @FXML private BorderPane borderPane;
+    private static LoginController instance;
+    @FXML
+    public TextField hostnameTextfield;
+    @FXML
+    private ImageView Defaultview;
+    @FXML
+    private ImageView Sarahview;
+    @FXML
+    private ImageView Dominicview;
+    @FXML
+    private TextField portTextfield;
+    @FXML
+    private TextField usernameTextfield;
+    @FXML
+    private ChoiceBox imagePicker;
+    @FXML
+    private Label selectedPicture;
+    @FXML
+    private BorderPane borderPane;
     private double xOffset;
     private double yOffset;
     private Scene scene;
-
-    private static LoginController instance;
 
     public LoginController() {
         instance = this;
@@ -57,6 +65,7 @@ public class LoginController implements Initializable {
     public static LoginController getInstance() {
         return instance;
     }
+
     public void loginButtonAction() throws IOException {
         String hostname = hostnameTextfield.getText();
         int port = Integer.parseInt(portTextfield.getText());
@@ -65,7 +74,7 @@ public class LoginController implements Initializable {
 
         FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
         Parent window = (Pane) fmxlLoader.load();
-        con = fmxlLoader.<ChatController>getController();
+        con = fmxlLoader.getController();
         Listener listener = new Listener(hostname, port, username, picture, con);
         Thread x = new Thread(listener);
         x.start();
@@ -148,7 +157,7 @@ public class LoginController implements Initializable {
             }
         });
         int numberOfSquares = 30;
-        while (numberOfSquares > 0){
+        while (numberOfSquares > 0) {
             generateAnimation();
             numberOfSquares--;
         }
@@ -158,7 +167,7 @@ public class LoginController implements Initializable {
     /* This method is used to generate the animation on the login window, It will generate random ints to determine
      * the size, speed, starting points and direction of each square.
      */
-    public void generateAnimation(){
+    public void generateAnimation() {
         Random rand = new Random();
         int sizeOfSqaure = rand.nextInt(50) + 1;
         int speedOfSqaure = rand.nextInt(10) + 5;
@@ -170,37 +179,37 @@ public class LoginController implements Initializable {
         KeyValue moveYAxis = null;
         Rectangle r1 = null;
 
-        switch (direction){
-            case 1 :
+        switch (direction) {
+            case 1:
                 // MOVE LEFT TO RIGHT
-                r1 = new Rectangle(0,startYPoint,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
+                r1 = new Rectangle(0, startYPoint, sizeOfSqaure, sizeOfSqaure);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
                 break;
-            case 2 :
+            case 2:
                 // MOVE TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
                 moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
                 break;
-            case 3 :
+            case 3:
                 // MOVE LEFT TO RIGHT, TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
                 moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
                 break;
-            case 4 :
+            case 4:
                 // MOVE BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint,420-sizeOfSqaure ,sizeOfSqaure,sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 420 - sizeOfSqaure, sizeOfSqaure, sizeOfSqaure);
                 moveYAxis = new KeyValue(r1.xProperty(), 0);
                 break;
-            case 5 :
+            case 5:
                 // MOVE RIGHT TO LEFT
-                r1 = new Rectangle(420-sizeOfSqaure,startYPoint,sizeOfSqaure,sizeOfSqaure);
+                r1 = new Rectangle(420 - sizeOfSqaure, startYPoint, sizeOfSqaure, sizeOfSqaure);
                 moveXAxis = new KeyValue(r1.xProperty(), 0);
                 break;
-            case 6 :
+            case 6:
                 //MOVE RIGHT TO LEFT, BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
                 moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
                 break;
 
@@ -217,22 +226,22 @@ public class LoginController implements Initializable {
         timeline.setAutoReverse(true);
         timeline.getKeyFrames().add(keyFrame);
         timeline.play();
-        borderPane.getChildren().add(borderPane.getChildren().size()-1,r1);
+        borderPane.getChildren().add(borderPane.getChildren().size() - 1, r1);
     }
 
     /* Terminates Application */
-    public void closeSystem(){
+    public void closeSystem() {
         Platform.exit();
         System.exit(0);
     }
 
-    public void minimizeWindow(){
+    public void minimizeWindow() {
         MainLauncher.getPrimaryStage().setIconified(true);
     }
 
     /* This displays an alert message to the user */
     public void showErrorDialog(String message) {
-        Platform.runLater(()-> {
+        Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Warning!");
             alert.setHeaderText(message);

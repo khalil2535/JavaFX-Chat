@@ -12,21 +12,20 @@ import java.net.Socket;
 
 import static com.messages.MessageType.CONNECTED;
 
-public class Listener implements Runnable{
+public class Listener implements Runnable {
 
     private static final String HASCONNECTED = "has connected";
-
+    public static String username;
     private static String picture;
-    private Socket socket;
+    private static ObjectOutputStream oos;
     public String hostname;
     public int port;
-    public static String username;
     public ChatController controller;
-    private static ObjectOutputStream oos;
+    Logger logger = LoggerFactory.getLogger(Listener.class);
+    private Socket socket;
     private InputStream is;
     private ObjectInputStream input;
     private OutputStream outputStream;
-    Logger logger = LoggerFactory.getLogger(Listener.class);
 
     public Listener(String hostname, int port, String username, String picture, ChatController controller) {
         this.hostname = hostname;
@@ -34,6 +33,43 @@ public class Listener implements Runnable{
         Listener.username = username;
         Listener.picture = picture;
         this.controller = controller;
+    }
+
+    /* This method is used for sending a normal Message
+     * @param msg - The message which the user generates
+     */
+    public static void send(String msg) throws IOException {
+        Message createMessage = new Message();
+        createMessage.setName(username);
+        createMessage.setType(MessageType.USER);
+        createMessage.setStatus(Status.AWAY);
+        createMessage.setMsg(msg);
+        createMessage.setPicture(picture);
+        oos.writeObject(createMessage);
+        oos.flush();
+    }
+
+    /* This method is used for sending a normal Message
+     * @param msg - The message which the user generates
+     */
+    public static void sendStatusUpdate(Status status) throws IOException {
+        Message createMessage = new Message();
+        createMessage.setName(username);
+        createMessage.setType(MessageType.STATUS);
+        createMessage.setStatus(status);
+        createMessage.setPicture(picture);
+        oos.writeObject(createMessage);
+        oos.flush();
+    }
+
+    /* This method is used to send a connecting message */
+    public static void connect() throws IOException {
+        Message createMessage = new Message();
+        createMessage.setName(username);
+        createMessage.setType(CONNECTED);
+        createMessage.setMsg(HASCONNECTED);
+        createMessage.setPicture(picture);
+        oos.writeObject(createMessage);
     }
 
     public void run() {
@@ -85,44 +121,6 @@ public class Listener implements Runnable{
             e.printStackTrace();
             controller.logoutScene();
         }
-    }
-
-    /* This method is used for sending a normal Message
-     * @param msg - The message which the user generates
-     */
-    public static void send(String msg) throws IOException {
-        Message createMessage = new Message();
-        createMessage.setName(username);
-        createMessage.setType(MessageType.USER);
-        createMessage.setStatus(Status.AWAY);
-        createMessage.setMsg(msg);
-        createMessage.setPicture(picture);
-        oos.writeObject(createMessage);
-        oos.flush();
-    }
-
-
-    /* This method is used for sending a normal Message
- * @param msg - The message which the user generates
- */
-    public static void sendStatusUpdate(Status status) throws IOException {
-        Message createMessage = new Message();
-        createMessage.setName(username);
-        createMessage.setType(MessageType.STATUS);
-        createMessage.setStatus(status);
-        createMessage.setPicture(picture);
-        oos.writeObject(createMessage);
-        oos.flush();
-    }
-
-    /* This method is used to send a connecting message */
-    public static void connect() throws IOException {
-        Message createMessage = new Message();
-        createMessage.setName(username);
-        createMessage.setType(CONNECTED);
-        createMessage.setMsg(HASCONNECTED);
-        createMessage.setPicture(picture);
-        oos.writeObject(createMessage);
     }
 
 }

@@ -16,6 +16,7 @@ public class FadeAnimation implements TrayAnimation {
 
     /**
      * Initializes a fade type animation on a stage
+     *
      * @param customStage The stage associate the fade animation with
      */
     public FadeAnimation(CustomStage customStage) {
@@ -32,7 +33,6 @@ public class FadeAnimation implements TrayAnimation {
     }
 
     /**
-     *
      * @return a constructed instance of a show fade animation
      */
     private Timeline setupShowAnimation() {
@@ -55,7 +55,6 @@ public class FadeAnimation implements TrayAnimation {
     }
 
     /**
-     *
      * @return a constructed instance of a dismiss fade animation
      */
     private Timeline setupDismissAnimation() {

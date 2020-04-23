@@ -43,7 +43,7 @@ public class Listener implements Runnable {
         createMessage.setName(username);
         createMessage.setType(MessageType.USER);
         createMessage.setStatus(Status.AWAY);
-        createMessage.setMsg(msg);
+        createMessage.setText(msg);
         createMessage.setPicture(picture);
         oos.writeObject(createMessage);
         oos.flush();
@@ -67,7 +67,7 @@ public class Listener implements Runnable {
         Message createMessage = new Message();
         createMessage.setName(username);
         createMessage.setType(CONNECTED);
-        createMessage.setMsg(HASCONNECTED);
+        createMessage.setText(HASCONNECTED);
         createMessage.setPicture(picture);
         oos.writeObject(createMessage);
     }
@@ -94,7 +94,7 @@ public class Listener implements Runnable {
                 message = (Message) input.readObject();
 
                 if (message != null) {
-                    logger.debug("Message recieved:" + message.getMsg() + " MessageType:" + message.getType() + "Name:" + message.getName());
+                    logger.debug("Message recieved:" + message.getText() + " MessageType:" + message.getType() + "Name:" + message.getName());
                     switch (message.getType()) {
                         case USER:
                             controller.addToChat(message);

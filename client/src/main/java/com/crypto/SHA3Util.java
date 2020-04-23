@@ -1,11 +1,10 @@
 package com.crypto;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.bouncycastle.util.encoders.Hex;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 public class SHA3Util {
 
@@ -19,18 +18,18 @@ public class SHA3Util {
         return digest(string, s, true);
     }
 
-    public static String digest(String string, Size s, boolean bouncyencoder) {
+    public static String digest(String string, Size s, boolean bouncyEncoder) {
         Size size = s == null ? DEFAULT : s;
 
         DigestSHA3 md = new DigestSHA3(size.getValue());
         String text = string != null ? string : "null";
         md.update(text.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
-        return encode(digest, bouncyencoder);
+        return encode(digest, bouncyEncoder);
     }
 
-    public static String encode(byte[] bytes, boolean bouncyencoder) {
-        if (bouncyencoder)
+    public static String encode(byte[] bytes, boolean bouncyEncoder) {
+        if (bouncyEncoder)
             return Hex.toHexString(bytes);
         else {
             BigInteger bigInt = new BigInteger(1, bytes);

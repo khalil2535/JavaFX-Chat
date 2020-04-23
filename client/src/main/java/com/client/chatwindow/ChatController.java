@@ -83,7 +83,7 @@ public class ChatController implements Initializable {
                 profileImage.setFitHeight(32);
                 profileImage.setFitWidth(32);
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getName() + ": " + msg.getMsg());
+                bl6.setText(msg.getName() + ": " + msg.getText());
                 bl6.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
                 HBox x = new HBox();
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
@@ -107,7 +107,7 @@ public class ChatController implements Initializable {
                 profileImage.setFitWidth(32);
 
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getMsg());
+                bl6.setText(msg.getText());
                 bl6.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN,
                         null, null)));
                 HBox x = new HBox();
@@ -196,7 +196,7 @@ public class ChatController implements Initializable {
             @Override
             public HBox call() throws Exception {
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getMsg());
+                bl6.setText(msg.getText());
                 bl6.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE,
                         null, null)));
                 HBox x = new HBox();

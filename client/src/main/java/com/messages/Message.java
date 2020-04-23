@@ -8,7 +8,7 @@ public class Message implements Serializable {
 
     private String name;
     private MessageType type;
-    private String msg;
+    private String text;
     private int count;
     private ArrayList<User> list;
     private ArrayList<User> users;
@@ -35,14 +35,29 @@ public class Message implements Serializable {
         this.name = name;
     }
 
-    public String getMsg() {
-        //TODO decrypt here
-        return msg;
+    public String getText() {
+//        TODO decrypt here
+//        if (type == MessageType.USER) {
+//            try {
+//                text = Symmetric.decrypt(text, "ok");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+
+        return text;
     }
 
-    public void setMsg(String msg) {
-        //TODO encrypt here
-        this.msg = msg;
+    public void setText(String text) {
+//        TODO encrypt here
+//        if (type == MessageType.USER) {
+//            try {
+//                text = Symmetric.encrypt(text, "ok");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+        this.text = text;
     }
 
     public MessageType getType() {

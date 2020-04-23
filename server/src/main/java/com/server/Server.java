@@ -72,7 +72,7 @@ public class Server {
                 while (socket.isConnected()) {
                     Message inputmsg = (Message) input.readObject();
                     if (inputmsg != null) {
-                        logger.info(inputmsg.getType() + " - " + inputmsg.getName() + ": " + inputmsg.getMsg());
+                        logger.info(inputmsg.getType() + " - " + inputmsg.getName() + ": " + inputmsg.getText());
                         switch (inputmsg.getType()) {
                             case USER:
                                 write(inputmsg);
@@ -102,7 +102,7 @@ public class Server {
             Message msg = new Message();
             msg.setName(user.getName());
             msg.setType(MessageType.STATUS);
-            msg.setMsg("");
+            msg.setText("");
             User userObj = names.get(name);
             userObj.setStatus(inputmsg.getStatus());
             write(msg);
@@ -130,7 +130,7 @@ public class Server {
 
         private Message sendNotification(Message firstMessage) throws IOException {
             Message msg = new Message();
-            msg.setMsg("has joined the chat.");
+            msg.setText("has joined the chat.");
             msg.setType(MessageType.NOTIFICATION);
             msg.setName(firstMessage.getName());
             msg.setPicture(firstMessage.getPicture());
@@ -142,7 +142,7 @@ public class Server {
         private Message removeFromList() throws IOException {
             logger.debug("removeFromList() method Enter");
             Message msg = new Message();
-            msg.setMsg("has left the chat.");
+            msg.setText("has left the chat.");
             msg.setType(MessageType.DISCONNECTED);
             msg.setName("SERVER");
             msg.setUserlist(names);
@@ -156,7 +156,7 @@ public class Server {
          */
         private Message addToList() throws IOException {
             Message msg = new Message();
-            msg.setMsg("Welcome, You have now joined the server! Enjoy chatting!");
+            msg.setText("Welcome, You have now joined the server! Enjoy chatting!");
             msg.setType(MessageType.CONNECTED);
             msg.setName("SERVER");
             write(msg);

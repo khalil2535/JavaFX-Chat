@@ -1,5 +1,7 @@
 package com.messages;
 
+import com.crypto.Symmetric;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,27 +38,36 @@ public class Message implements Serializable {
     }
 
     public String getText() {
-//        TODO decrypt here
-//        if (type == MessageType.USER) {
-//            try {
-//                text = Symmetric.decrypt(text, "ok");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-
         return text;
     }
 
     public void setText(String text) {
 //        TODO encrypt here
-//        if (type == MessageType.USER) {
-//            try {
-//                text = Symmetric.encrypt(text, "ok");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+        this.text = text;
+    }
+
+    public String getTextDecrypted(String key) {
+        String decryptedText = null;
+        if (type == MessageType.USER) {
+            try {
+                // TODO use key
+                decryptedText = Symmetric.decrypt(text, "ok");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return decryptedText;
+    }
+
+    public void setTextEncrypted(String text, String key) {
+        if (type == MessageType.USER) {
+            try {
+                // TODO use key
+                text = Symmetric.encrypt(text, "ok");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         this.text = text;
     }
 

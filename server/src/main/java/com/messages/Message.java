@@ -1,5 +1,7 @@
 package com.messages;
 
+import com.crypto.Symmetric;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +10,7 @@ public class Message implements Serializable {
 
     private String name;
     private MessageType type;
-    private String msg;
+    private String text;
     private int count;
     private ArrayList<User> list;
     private ArrayList<User> users;
@@ -35,14 +37,38 @@ public class Message implements Serializable {
         this.name = name;
     }
 
-    public String getMsg() {
-        //TODO decrypt here
-        return msg;
+    public String getText() {
+        return text;
     }
 
-    public void setMsg(String msg) {
-        //TODO encrypt here
-        this.msg = msg;
+    public void setText(String text) {
+//        TODO encrypt here
+        this.text = text;
+    }
+
+    public String getTextDecrypted(String key) {
+        String decryptedText = null;
+        if (type == MessageType.USER) {
+            try {
+                // TODO use key
+                decryptedText = Symmetric.decrypt(text, "ok");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return decryptedText;
+    }
+
+    public void setTextEncrypted(String text, String key) {
+        if (type == MessageType.USER) {
+            try {
+                // TODO use key
+                text = Symmetric.encrypt(text, "ok");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        this.text = text;
     }
 
     public MessageType getType() {
@@ -84,5 +110,4 @@ public class Message implements Serializable {
     public void setStatus(Status status) {
         this.status = status;
     }
-
 }

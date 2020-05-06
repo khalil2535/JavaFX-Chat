@@ -1,7 +1,5 @@
 package com.model.crypto;
 
-import org.bouncycastle.util.encoders.Base64;
-
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -11,16 +9,18 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.util.Base64;
 
 import static com.model.crypto.Util.UTF8;
+import static com.model.crypto.Util.getRandomString;
 
-public class Symmetric {
+public class AES {
 
     private final static String TYPE = "AES";
     private final static String ALGORITHM = TYPE + "/CBC/PKCS5Padding";
     private final static String KEY_HASH = "PBKDF2WithHmacSHA256";
 
-    private Symmetric() {
+    private AES() {
     }
 
     /**
@@ -44,8 +44,8 @@ public class Symmetric {
         // encrypt the message
         byte[] encryptedMsgBytes = cipher.doFinal(msg.getBytes(UTF8));
 
-        // return as String
-        return Base64.toBase64String(encryptedMsgBytes);
+        // encode and encrypted message return message
+        return Base64.getEncoder().encodeToString(encryptedMsgBytes);
     }
 
     /**
@@ -63,20 +63,26 @@ public class Symmetric {
         // generate AES Key from String
         SecretKey secKey = getSecretKey(password);
 
-        // decrypt using the secret password
+        // decode message
+        byte[] decodedMsg = Base64.getDecoder().decode(encryptedMsg);
+
+        // decrypt using the secret password and parameters
         cipher.init(Cipher.DECRYPT_MODE, secKey, new IvParameterSpec(new byte[cipher.getBlockSize()]));
-        byte[] decodedMsg = Base64.decode(encryptedMsg);
         byte[] decryptedMsg = cipher.doFinal(decodedMsg);
 
         // return as String
         return new String(decryptedMsg, UTF8);
     }
 
-    private static SecretKey getSecretKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static SecretKeySpec getSecretKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
         SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_HASH);
         byte[] salt = new byte[8];
         KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, 65536, 256);
         SecretKey tmp = factory.generateSecret(spec);
         return new SecretKeySpec(tmp.getEncoded(), TYPE);
+    }
+
+    public static String generateKey() {
+        return getRandomString(16);
     }
 }

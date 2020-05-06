@@ -15,7 +15,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -191,6 +194,8 @@ public class LoginController implements Initializable {
                 moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
                 break;
             case 3:
+            case 6:
+                //MOVE RIGHT TO LEFT, BOTTOM TO TOP
                 // MOVE LEFT TO RIGHT, TOP TO BOTTOM
                 r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
                 moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
@@ -206,13 +211,6 @@ public class LoginController implements Initializable {
                 r1 = new Rectangle(420 - sizeOfSqaure, startYPoint, sizeOfSqaure, sizeOfSqaure);
                 moveXAxis = new KeyValue(r1.xProperty(), 0);
                 break;
-            case 6:
-                //MOVE RIGHT TO LEFT, BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
-                break;
-
             default:
                 System.out.println("default");
         }

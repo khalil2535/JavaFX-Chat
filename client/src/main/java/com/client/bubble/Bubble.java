@@ -1,10 +1,6 @@
-package com.model.messages.bubble;
+package com.client.bubble;
 
-import javafx.scene.shape.HLineTo;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.VLineTo;
+import javafx.scene.shape.*;
 
 public class Bubble extends Path {
 	

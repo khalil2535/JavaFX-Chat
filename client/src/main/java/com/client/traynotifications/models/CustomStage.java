@@ -1,4 +1,4 @@
-package com.traynotifications.models;
+package com.client.traynotifications.models;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Rectangle2D;

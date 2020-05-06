@@ -1,4 +1,4 @@
-package com.traynotifications.notification;
+package com.client.traynotifications.notification;
 
 public enum NotificationType {
     INFORMATION,

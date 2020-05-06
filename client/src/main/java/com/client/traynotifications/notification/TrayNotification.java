@@ -1,4 +1,4 @@
-package com.traynotifications.notification;
+package com.client.traynotifications.notification;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -13,8 +13,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
-import com.traynotifications.animations.*;
-import com.traynotifications.models.CustomStage;
+import com.client.traynotifications.animations.*;
+import com.client.traynotifications.models.CustomStage;
 
 import java.io.IOException;
 import java.net.URL;

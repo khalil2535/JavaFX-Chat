@@ -1,6 +1,6 @@
 package com.server;
 
-import com.exception.DuplicateUsernameException;
+import com.server.exception.DuplicateUsernameException;
 import com.model.messages.Message;
 import com.model.messages.MessageType;
 import com.model.messages.Status;

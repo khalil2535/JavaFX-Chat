@@ -1,4 +1,4 @@
-package com.traynotifications.models;
+package com.client.traynotifications.models;
 
 public class Location {
 

@@ -84,7 +84,7 @@
             </HBox>
             <Label text="JavaFX Version 0.3" textFill="#f89406" GridPane.columnIndex="1" GridPane.rowIndex="8">
                <font>
-                  <Font size="10.0" />
+                  <Font SHA3Size="10.0" />
                </font>
             </Label>
          </children>

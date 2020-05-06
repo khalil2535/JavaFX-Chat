@@ -1,6 +1,6 @@
 package com.model.messages;
 
-import com.model.crypto.Symmetric;
+import com.model.crypto.AES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ public class Message implements Serializable {
         if (type == MessageType.USER) {
             try {
                 // TODO use key
-                decryptedText = Symmetric.decrypt(text, "ok");
+                decryptedText = AES.decrypt(text, "ok");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -63,7 +63,7 @@ public class Message implements Serializable {
         if (type == MessageType.USER) {
             try {
                 // TODO use key
-                text = Symmetric.encrypt(text, "ok");
+                text = AES.encrypt(text, "ok");
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -6,22 +6,22 @@ import org.bouncycastle.util.encoders.Hex;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-public class SHA3Util {
+public class SHA3 {
 
-    private static Size DEFAULT = Size.S512;
+    private static final SHA3Size DEFAULT = SHA3Size.S512;
 
     public static String digest(String string) {
         return digest(string, DEFAULT, true);
     }
 
-    public static String digest(String string, Size s) {
+    public static String digest(String string, SHA3Size s) {
         return digest(string, s, true);
     }
 
-    public static String digest(String string, Size s, boolean bouncyEncoder) {
-        Size size = s == null ? DEFAULT : s;
+    public static String digest(String string, SHA3Size s, boolean bouncyEncoder) {
+        SHA3Size SHA3Size = s == null ? DEFAULT : s;
 
-        DigestSHA3 md = new DigestSHA3(size.getValue());
+        DigestSHA3 md = new DigestSHA3(SHA3Size.getValue());
         String text = string != null ? string : "null";
         md.update(text.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
@@ -37,7 +37,7 @@ public class SHA3Util {
         }
     }
 
-    protected enum Size {
+    protected enum SHA3Size {
 
         S224(224),
         S256(256),
@@ -46,7 +46,7 @@ public class SHA3Util {
 
         int bits = 0;
 
-        Size(int bits) {
+        SHA3Size(int bits) {
             this.bits = bits;
         }
 

@@ -1,4 +1,4 @@
-package com.exception;
+package com.server.exception;
 
 /**
  * @author Dominic

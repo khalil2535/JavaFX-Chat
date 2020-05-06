@@ -1,8 +1,8 @@
-package com.traynotifications.animations;
+package com.client.traynotifications.animations;
 
 import javafx.animation.*;
 import javafx.util.Duration;
-import com.traynotifications.models.CustomStage;
+import com.client.traynotifications.models.CustomStage;
 
 public class SlideAnimation implements TrayAnimation {
 

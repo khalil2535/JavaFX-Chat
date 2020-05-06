@@ -13,17 +13,17 @@
       <ImageView fx:id="imageIcon" fitHeight="67.0" fitWidth="67.0" layoutX="47.0" layoutY="9.0" pickOnBounds="true" />
       <Label fx:id="lblTitle" layoutX="126.0" layoutY="9.0" text="Title:" wrapText="true">
          <font>
-            <Font name="System Bold" size="16.0" />
+            <Font name="System Bold" SHA3Size="16.0" />
          </font>
       </Label>
       <Label fx:id="lblMessage" layoutX="126.0" layoutY="52.0" text="Message:" wrapText="true">
          <font>
-            <Font size="13.0" />
+            <Font SHA3Size="13.0" />
          </font>
       </Label>
       <Label fx:id="lblClose" layoutX="441.0" text="x">
          <font>
-            <Font size="20.0" />
+            <Font SHA3Size="20.0" />
          </font>
          <cursor>
             <Cursor fx:constant="HAND" />

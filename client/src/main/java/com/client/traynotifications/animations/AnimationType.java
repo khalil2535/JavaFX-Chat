@@ -1,4 +1,4 @@
-package com.traynotifications.animations;
+package com.client.traynotifications.animations;
 
 public enum AnimationType {
     FADE,

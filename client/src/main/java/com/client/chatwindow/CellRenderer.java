@@ -1,6 +1,6 @@
 package com.client.chatwindow;
 
-import com.messages.User;
+import com.model.messages.User;
 import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;

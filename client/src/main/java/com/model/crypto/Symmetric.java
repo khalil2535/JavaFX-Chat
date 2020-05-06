@@ -1,4 +1,4 @@
-package com.crypto;
+package com.model.crypto;
 
 import org.bouncycastle.util.encoders.Base64;
 
@@ -12,7 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
-import static com.crypto.Util.UTF8;
+import static com.model.crypto.Util.UTF8;
 
 public class Symmetric {
 

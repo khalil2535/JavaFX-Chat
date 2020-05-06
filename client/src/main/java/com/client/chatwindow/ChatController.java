@@ -1,11 +1,11 @@
 package com.client.chatwindow;
 
 import com.client.login.MainLauncher;
-import com.messages.Message;
-import com.messages.Status;
-import com.messages.User;
-import com.messages.bubble.BubbleSpec;
-import com.messages.bubble.BubbledLabel;
+import com.model.messages.Message;
+import com.model.messages.Status;
+import com.model.messages.User;
+import com.model.messages.bubble.BubbleSpec;
+import com.model.messages.bubble.BubbledLabel;
 import com.traynotifications.animations.AnimationType;
 import com.traynotifications.notification.TrayNotification;
 import javafx.application.Platform;

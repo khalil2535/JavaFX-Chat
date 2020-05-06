@@ -1,6 +1,6 @@
-package com.messages;
+package com.model.messages;
 
-import com.crypto.Symmetric;
+import com.model.crypto.Symmetric;
 
 import java.io.Serializable;
 import java.util.ArrayList;

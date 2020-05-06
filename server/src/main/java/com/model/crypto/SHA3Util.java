@@ -1,4 +1,4 @@
-package com.crypto;
+package com.model.crypto;
 
 import org.bouncycastle.jcajce.provider.digest.SHA3.DigestSHA3;
 import org.bouncycastle.util.encoders.Hex;

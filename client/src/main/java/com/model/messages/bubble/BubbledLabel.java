@@ -1,4 +1,4 @@
-package com.messages.bubble;
+package com.model.messages.bubble;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;

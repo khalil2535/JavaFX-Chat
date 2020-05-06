@@ -1,10 +1,10 @@
 package com.server;
 
 import com.exception.DuplicateUsernameException;
-import com.messages.Message;
-import com.messages.MessageType;
-import com.messages.Status;
-import com.messages.User;
+import com.model.messages.Message;
+import com.model.messages.MessageType;
+import com.model.messages.Status;
+import com.model.messages.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +21,9 @@ public class Server {
     /* Setting up variables */
     private static final int PORT = 9001;
     private static final HashMap<String, User> names = new HashMap<>();
+    private static final HashSet<ObjectOutputStream> writers = new HashSet<>();
+    private static final ArrayList<User> users = new ArrayList<>();
     static Logger logger = LoggerFactory.getLogger(Server.class);
-    private static HashSet<ObjectOutputStream> writers = new HashSet<>();
-    private static ArrayList<User> users = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
         logger.info("The chat server is running.");
@@ -42,9 +42,9 @@ public class Server {
 
 
     private static class Handler extends Thread {
+        private final Socket socket;
+        private final Logger logger = LoggerFactory.getLogger(Handler.class);
         private String name;
-        private Socket socket;
-        private Logger logger = LoggerFactory.getLogger(Handler.class);
         private User user;
         private ObjectInputStream input;
         private OutputStream os;

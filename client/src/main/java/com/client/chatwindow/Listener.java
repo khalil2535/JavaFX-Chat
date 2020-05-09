@@ -1,6 +1,5 @@
 package com.client.chatwindow;
 
-import com.client.login.LoginController;
 import com.client.util.DialogsUtil;
 import com.model.messages.Message;
 import com.model.messages.MessageType;
@@ -77,7 +76,6 @@ public class Listener implements Runnable {
         Socket socket = null;
         try {
             socket = new Socket(hostname, port);
-            LoginController.getInstance().showScene();
             OutputStream outputStream = socket.getOutputStream();
             oos = new ObjectOutputStream(outputStream);
             InputStream is = socket.getInputStream();

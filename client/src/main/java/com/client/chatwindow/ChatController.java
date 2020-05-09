@@ -1,5 +1,6 @@
 package com.client.chatwindow;
 
+import com.client.App;
 import com.client.bubble.BubbleSpec;
 import com.client.bubble.BubbledLabel;
 import com.client.login.MainLauncher;
@@ -228,14 +229,14 @@ public class ChatController implements Initializable {
         }
         /* Drag and Drop */
         borderPane.setOnMousePressed(event -> {
-            xOffset = MainLauncher.getPrimaryStage().getX() - event.getScreenX();
-            yOffset = MainLauncher.getPrimaryStage().getY() - event.getScreenY();
+            xOffset = App.getStage().getX() - event.getScreenX();
+            yOffset = App.getStage().getY() - event.getScreenY();
             borderPane.setCursor(Cursor.CLOSED_HAND);
         });
 
         borderPane.setOnMouseDragged(event -> {
-            MainLauncher.getPrimaryStage().setX(event.getScreenX() + xOffset);
-            MainLauncher.getPrimaryStage().setY(event.getScreenY() + yOffset);
+            App.getStage().setX(event.getScreenX() + xOffset);
+            App.getStage().setY(event.getScreenY() + yOffset);
 
         });
 
@@ -290,7 +291,7 @@ public class ChatController implements Initializable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Stage stage = MainLauncher.getPrimaryStage();
+            Stage stage = App.getStage();
             Scene scene = new Scene(window);
             stage.setMaxWidth(350);
             stage.setMaxHeight(420);

@@ -1,5 +1,6 @@
 package com.client.login;
 
+import com.client.App;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -13,23 +14,18 @@ import java.io.IOException;
 
 public class MainLauncher extends Application {
 
-    private static Stage primaryStageObj;
-
     public static void main(String[] args) {
         launch(args);
     }
 
-    public static Stage getPrimaryStage() {
-        return primaryStageObj;
-    }
-
     @Override
     public void start(Stage primaryStage) throws IOException {
-        primaryStageObj = primaryStage;
+        App.setStage(primaryStage);
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("views/LoginView.fxml"));
         primaryStage.initStyle(StageStyle.UNDECORATED);
-        primaryStage.setTitle("Socket Chat : Client version 0.3");
-        primaryStage.getIcons().add(new Image(getClass().getClassLoader().getResource("images/plug.png").toString()));
+        primaryStage.setTitle("Secure Socket Chat");
+        String applicationIconPath = getClass().getClassLoader().getResource("images/plug.png").toString();
+        primaryStage.getIcons().add(new Image(applicationIconPath));
         Scene mainScene = new Scene(root, 350, 420);
         mainScene.setRoot(root);
         primaryStage.setResizable(false);

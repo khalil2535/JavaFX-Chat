@@ -1,5 +1,6 @@
 package com.client.login;
 
+import com.client.App;
 import com.client.chatwindow.ChatController;
 import com.client.chatwindow.Listener;
 import com.client.util.ResizeHelper;
@@ -17,6 +18,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -34,8 +36,7 @@ import java.util.ResourceBundle;
  * Created by Dominic on 12-Nov-15.
  */
 public class LoginController implements Initializable {
-    public static ChatController con;
-    private static LoginController instance;
+    public static ChatController chatController;
     @FXML
     public TextField hostnameTextfield;
     @FXML
@@ -58,13 +59,6 @@ public class LoginController implements Initializable {
     private double yOffset;
     private Scene scene;
 
-    public LoginController() {
-        instance = this;
-    }
-
-    public static LoginController getInstance() {
-        return instance;
-    }
 
     public void loginButtonAction() throws IOException {
         String hostname = hostnameTextfield.getText();
@@ -72,15 +66,17 @@ public class LoginController implements Initializable {
         String username = usernameTextfield.getText();
         String picture = selectedPicture.getText();
 
+        // TODO change this here
+        Listener listener = new Listener(hostname, port, username, picture, chatController);
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
         Parent window = (Pane) fxmlLoader.load();
-        con = fxmlLoader.getController();
-        Listener listener = new Listener(hostname, port, username, picture, con);
+        chatController = fxmlLoader.getController();
         new Thread(listener).start();
+        this.showScene();
         this.scene = new Scene(window);
     }
 
-    public void showScene() {
+    public void showScene() { // TODO change this here
         Platform.runLater(() -> {
             Stage stage = (Stage) hostnameTextfield.getScene().getWindow();
             stage.setResizable(true);
@@ -96,8 +92,8 @@ public class LoginController implements Initializable {
             stage.setMinHeight(300);
             ResizeHelper.addResizeListener(stage);
             stage.centerOnScreen();
-            con.setUsernameLabel(usernameTextfield.getText());
-            con.setImageLabel(selectedPicture.getText());
+            chatController.setUsernameLabel(usernameTextfield.getText());
+            chatController.setImageLabel(selectedPicture.getText());
         });
     }
 
@@ -108,48 +104,37 @@ public class LoginController implements Initializable {
         selectedPicture.setVisible(false);
 
         /* Drag and Drop */
-        borderPane.setOnMousePressed(event -> {
-            xOffset = MainLauncher.getPrimaryStage().getX() - event.getScreenX();
-            yOffset = MainLauncher.getPrimaryStage().getY() - event.getScreenY();
-            borderPane.setCursor(Cursor.CLOSED_HAND);
-        });
+        imagePicker.getSelectionModel().selectedItemProperty().addListener(
+                (selected, oldPicture, newPicture) -> {
+                    if (oldPicture != null) {
+                        switch (oldPicture) {
+                            case "Default":
+                                Defaultview.setVisible(false);
+                                break;
+                            case "Dominic":
+                                Dominicview.setVisible(false);
+                                break;
+                            case "Sarah":
+                                Sarahview.setVisible(false);
+                                break;
+                        }
+                    }
+                    if (newPicture != null) {
+                        switch (newPicture) {
+                            case "Default":
+                                Defaultview.setVisible(true);
+                                break;
+                            case "Dominic":
+                                Dominicview.setVisible(true);
+                                break;
+                            case "Sarah":
+                                Sarahview.setVisible(true);
+                                break;
+                        }
+                    }
+                });
 
-        borderPane.setOnMouseDragged(event -> {
-            MainLauncher.getPrimaryStage().setX(event.getScreenX() + xOffset);
-            MainLauncher.getPrimaryStage().setY(event.getScreenY() + yOffset);
 
-        });
-
-        borderPane.setOnMouseReleased(event -> borderPane.setCursor(Cursor.DEFAULT));
-
-        imagePicker.getSelectionModel().selectedItemProperty().addListener((selected, oldPicture, newPicture) -> {
-            if (oldPicture != null) {
-                switch (oldPicture) {
-                    case "Default":
-                        Defaultview.setVisible(false);
-                        break;
-                    case "Dominic":
-                        Dominicview.setVisible(false);
-                        break;
-                    case "Sarah":
-                        Sarahview.setVisible(false);
-                        break;
-                }
-            }
-            if (newPicture != null) {
-                switch (newPicture) {
-                    case "Default":
-                        Defaultview.setVisible(true);
-                        break;
-                    case "Dominic":
-                        Dominicview.setVisible(true);
-                        break;
-                    case "Sarah":
-                        Sarahview.setVisible(true);
-                        break;
-                }
-            }
-        });
         int numberOfSquares = 30;
         while (numberOfSquares > 0) {
             generateAnimation();
@@ -162,8 +147,8 @@ public class LoginController implements Initializable {
      */
     public void generateAnimation() {
         Random rand = new Random();
-        int sizeOfSqaure = rand.nextInt(50) + 1;
-        int speedOfSqaure = rand.nextInt(10) + 5;
+        int sizeOfSquare = rand.nextInt(50) + 1;
+        int speedOfSquare = rand.nextInt(10) + 5;
         int startXPoint = rand.nextInt(420);
         int startYPoint = rand.nextInt(350);
         int direction = rand.nextInt(5) + 1;
@@ -175,30 +160,30 @@ public class LoginController implements Initializable {
         switch (direction) {
             case 1:
                 // MOVE LEFT TO RIGHT
-                r1 = new Rectangle(0, startYPoint, sizeOfSqaure, sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
+                r1 = new Rectangle(0, startYPoint, sizeOfSquare, sizeOfSquare);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSquare);
                 break;
             case 2:
                 // MOVE TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSquare, sizeOfSquare);
+                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSquare);
                 break;
             case 3:
             case 6:
                 //MOVE RIGHT TO LEFT, BOTTOM TO TOP
                 // MOVE LEFT TO RIGHT, TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint, 0, sizeOfSqaure, sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSquare, sizeOfSquare);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSquare);
+                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSquare);
                 break;
             case 4:
                 // MOVE BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint, 420 - sizeOfSqaure, sizeOfSqaure, sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 420 - sizeOfSquare, sizeOfSquare, sizeOfSquare);
                 moveYAxis = new KeyValue(r1.xProperty(), 0);
                 break;
             case 5:
                 // MOVE RIGHT TO LEFT
-                r1 = new Rectangle(420 - sizeOfSqaure, startYPoint, sizeOfSqaure, sizeOfSqaure);
+                r1 = new Rectangle(420 - sizeOfSquare, startYPoint, sizeOfSquare, sizeOfSquare);
                 moveXAxis = new KeyValue(r1.xProperty(), 0);
                 break;
             default:
@@ -208,7 +193,7 @@ public class LoginController implements Initializable {
         r1.setFill(Color.web("#F89406"));
         r1.setOpacity(0.1);
 
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(speedOfSqaure * 1000), moveXAxis, moveYAxis);
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(speedOfSquare * 1000), moveXAxis, moveYAxis);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.setAutoReverse(true);
@@ -218,12 +203,32 @@ public class LoginController implements Initializable {
     }
 
     /* Terminates Application */
+    @FXML
     public void closeSystem() {
         Platform.exit();
         System.exit(0);
     }
 
+    @FXML
     public void minimizeWindow() {
-        MainLauncher.getPrimaryStage().setIconified(true);
+        App.getStage().setIconified(true);
+    }
+
+    @FXML
+    private void handleMousePressed(MouseEvent event) {
+        xOffset = App.getStage().getX() - event.getScreenX();
+        yOffset = App.getStage().getY() - event.getScreenY();
+        borderPane.setCursor(Cursor.CLOSED_HAND);
+    }
+
+    @FXML
+    private void handleMouseDragged(MouseEvent event) {
+        App.getStage().setX(event.getScreenX() + xOffset);
+        App.getStage().setY(event.getScreenY() + yOffset);
+    }
+
+    @FXML
+    private void handleMouseReleased(MouseEvent event) {
+        borderPane.setCursor(Cursor.DEFAULT);
     }
 }

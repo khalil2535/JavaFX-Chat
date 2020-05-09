@@ -1,13 +1,13 @@
 package com.client.chatwindow;
 
+import com.client.bubble.BubbleSpec;
+import com.client.bubble.BubbledLabel;
 import com.client.login.MainLauncher;
+import com.client.traynotifications.animations.AnimationType;
+import com.client.traynotifications.notification.TrayNotification;
 import com.model.messages.Message;
 import com.model.messages.Status;
 import com.model.messages.User;
-import com.client.bubble.BubbleSpec;
-import com.client.bubble.BubbledLabel;
-import com.client.traynotifications.animations.AnimationType;
-import com.client.traynotifications.notification.TrayNotification;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,7 +21,10 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -44,13 +47,13 @@ import java.util.ResourceBundle;
 public class ChatController implements Initializable {
 
     @FXML
-    ListView chatPane;
+    ListView<HBox> chatPane;
     @FXML
     ListView statusList;
     @FXML
     BorderPane borderPane;
     @FXML
-    ComboBox statusComboBox;
+    ComboBox<String> statusComboBox;
     Logger logger = LoggerFactory.getLogger(ChatController.class);
     @FXML
     private TextArea messageBox;
@@ -59,7 +62,7 @@ public class ChatController implements Initializable {
     @FXML
     private Label onlineCountLabel;
     @FXML
-    private ListView userList;
+    private ListView<User> userList;
     @FXML
     private ImageView userImageView;
     private double xOffset;
@@ -77,8 +80,9 @@ public class ChatController implements Initializable {
     public synchronized void addToChat(Message msg) {
         Task<HBox> othersMessages = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
-                Image image = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() + ".png").toString());
+            public HBox call() {
+                String imagePath = "images/" + msg.getPicture().toLowerCase() + ".png";
+                Image image = new Image(getClass().getClassLoader().getResource(imagePath).toString());
                 ImageView profileImage = new ImageView(image);
                 profileImage.setFitHeight(32);
                 profileImage.setFitWidth(32);
@@ -88,7 +92,7 @@ public class ChatController implements Initializable {
                 HBox x = new HBox();
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
                 x.getChildren().addAll(profileImage, bl6);
-                logger.debug("ONLINE USERS: " + msg.getUserlist().size());
+                logger.debug("ONLINE USERS: " + msg.getUsers().size());
                 setOnlineLabel(Integer.toString(msg.getOnlineCount()));
                 return x;
             }
@@ -151,7 +155,7 @@ public class ChatController implements Initializable {
             ObservableList<User> users = FXCollections.observableList(msg.getUsers());
             userList.setItems(users);
             userList.setCellFactory(new CellRenderer());
-            setOnlineLabel(String.valueOf(msg.getUserlist().size()));
+            setOnlineLabel(String.valueOf(msg.getUsers().size()));
         });
         logger.info("setUserList() method Exit");
     }

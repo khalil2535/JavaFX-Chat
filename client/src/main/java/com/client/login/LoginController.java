@@ -7,15 +7,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -52,7 +49,7 @@ public class LoginController implements Initializable {
     @FXML
     private TextField usernameTextfield;
     @FXML
-    private ChoiceBox imagePicker;
+    private ChoiceBox<String> imagePicker;
     @FXML
     private Label selectedPicture;
     @FXML
@@ -75,16 +72,15 @@ public class LoginController implements Initializable {
         String username = usernameTextfield.getText();
         String picture = selectedPicture.getText();
 
-        FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
-        Parent window = (Pane) fmxlLoader.load();
-        con = fmxlLoader.getController();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
+        Parent window = (Pane) fxmlLoader.load();
+        con = fxmlLoader.getController();
         Listener listener = new Listener(hostname, port, username, picture, con);
-        Thread x = new Thread(listener);
-        x.start();
+        new Thread(listener).start();
         this.scene = new Scene(window);
     }
 
-    public void showScene() throws IOException {
+    public void showScene() {
         Platform.runLater(() -> {
             Stage stage = (Stage) hostnameTextfield.getScene().getWindow();
             stage.setResizable(true);
@@ -124,38 +120,33 @@ public class LoginController implements Initializable {
 
         });
 
-        borderPane.setOnMouseReleased(event -> {
-            borderPane.setCursor(Cursor.DEFAULT);
-        });
+        borderPane.setOnMouseReleased(event -> borderPane.setCursor(Cursor.DEFAULT));
 
-        imagePicker.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> selected, String oldPicture, String newPicture) {
-                if (oldPicture != null) {
-                    switch (oldPicture) {
-                        case "Default":
-                            Defaultview.setVisible(false);
-                            break;
-                        case "Dominic":
-                            Dominicview.setVisible(false);
-                            break;
-                        case "Sarah":
-                            Sarahview.setVisible(false);
-                            break;
-                    }
+        imagePicker.getSelectionModel().selectedItemProperty().addListener((selected, oldPicture, newPicture) -> {
+            if (oldPicture != null) {
+                switch (oldPicture) {
+                    case "Default":
+                        Defaultview.setVisible(false);
+                        break;
+                    case "Dominic":
+                        Dominicview.setVisible(false);
+                        break;
+                    case "Sarah":
+                        Sarahview.setVisible(false);
+                        break;
                 }
-                if (newPicture != null) {
-                    switch (newPicture) {
-                        case "Default":
-                            Defaultview.setVisible(true);
-                            break;
-                        case "Dominic":
-                            Dominicview.setVisible(true);
-                            break;
-                        case "Sarah":
-                            Sarahview.setVisible(true);
-                            break;
-                    }
+            }
+            if (newPicture != null) {
+                switch (newPicture) {
+                    case "Default":
+                        Defaultview.setVisible(true);
+                        break;
+                    case "Dominic":
+                        Dominicview.setVisible(true);
+                        break;
+                    case "Sarah":
+                        Sarahview.setVisible(true);
+                        break;
                 }
             }
         });
@@ -165,7 +156,6 @@ public class LoginController implements Initializable {
             numberOfSquares--;
         }
     }
-
 
     /* This method is used to generate the animation on the login window, It will generate random ints to determine
      * the size, speed, starting points and direction of each square.
@@ -235,17 +225,5 @@ public class LoginController implements Initializable {
 
     public void minimizeWindow() {
         MainLauncher.getPrimaryStage().setIconified(true);
-    }
-
-    /* This displays an alert message to the user */
-    public void showErrorDialog(String message) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning!");
-            alert.setHeaderText(message);
-            alert.setContentText("Please check for firewall issues and check if the server is running.");
-            alert.showAndWait();
-        });
-
     }
 }

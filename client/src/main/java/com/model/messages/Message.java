@@ -4,17 +4,13 @@ import com.model.crypto.AES;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Message implements Serializable {
 
     private String name;
     private MessageType type;
     private String text;
-    private int count;
-    private ArrayList<User> list;
     private ArrayList<User> users;
-
     private Status status;
     private String picture;
 
@@ -42,7 +38,6 @@ public class Message implements Serializable {
     }
 
     public void setText(String text) {
-//        TODO encrypt here
         this.text = text;
     }
 
@@ -79,20 +74,8 @@ public class Message implements Serializable {
         this.type = type;
     }
 
-    public ArrayList<User> getUserlist() {
-        return list;
-    }
-
-    public void setUserlist(HashMap<String, User> userList) {
-        this.list = new ArrayList<>(userList.values());
-    }
-
     public int getOnlineCount() {
-        return this.count;
-    }
-
-    public void setOnlineCount(int count) {
-        this.count = count;
+        return this.users.size();
     }
 
     public ArrayList<User> getUsers() {

@@ -10,6 +10,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 
+import java.util.Objects;
+
 /**
  * A Class for Rendering users images / name on the userlist.
  */
@@ -30,7 +32,7 @@ class CellRenderer implements Callback<ListView<User>, ListCell<User>> {
                     Text name = new Text(user.getName());
 
                     ImageView statusImageView = new ImageView();
-                    Image statusImage = new Image(getClass().getClassLoader().getResource("images/" + user.getStatus().toString().toLowerCase() + ".png").toString(), 16, 16, true, true);
+                    Image statusImage = new Image(Objects.requireNonNull(getClass().getClassLoader().getResource("images/" + user.getStatus().toString().toLowerCase() + ".png")).toString(), 16, 16, true, true);
                     statusImageView.setImage(statusImage);
 
                     ImageView pictureImageView = new ImageView();

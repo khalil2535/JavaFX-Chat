@@ -1,6 +1,7 @@
 package com.client.chatwindow;
 
 import com.client.login.LoginController;
+import com.client.util.DialogsUtil;
 import com.model.messages.Message;
 import com.model.messages.MessageType;
 import com.model.messages.Status;
@@ -14,18 +15,15 @@ import static com.model.messages.MessageType.CONNECTED;
 
 public class Listener implements Runnable {
 
-    private static final String HASCONNECTED = "has connected";
+    private static final String HAS_CONNECTED = "has connected";
     public static String username;
     private static String picture;
     private static ObjectOutputStream oos;
     public String hostname;
     public int port;
-    public ChatController controller;
+    ChatController controller;
     Logger logger = LoggerFactory.getLogger(Listener.class);
-    private Socket socket;
-    private InputStream is;
     private ObjectInputStream input;
-    private OutputStream outputStream;
 
     public Listener(String hostname, int port, String username, String picture, ChatController controller) {
         this.hostname = hostname;
@@ -35,8 +33,11 @@ public class Listener implements Runnable {
         this.controller = controller;
     }
 
-    /* This method is used for sending a normal Message
+    /**
+     * This method is used for sending a normal Message
+     *
      * @param msg - The message which the user generates
+     * @throws IOException when error happen in sending message
      */
     public static void send(String msg) throws IOException {
         Message createMessage = new Message();
@@ -63,38 +64,38 @@ public class Listener implements Runnable {
     }
 
     /* This method is used to send a connecting message */
-    public static void connect() throws IOException {
+    public static void sendConnectMsg() throws IOException {
         Message createMessage = new Message();
         createMessage.setName(username);
         createMessage.setType(CONNECTED);
-        createMessage.setText(HASCONNECTED);
+        createMessage.setText(HAS_CONNECTED);
         createMessage.setPicture(picture);
         oos.writeObject(createMessage);
     }
 
     public void run() {
+        Socket socket = null;
         try {
             socket = new Socket(hostname, port);
             LoginController.getInstance().showScene();
-            outputStream = socket.getOutputStream();
+            OutputStream outputStream = socket.getOutputStream();
             oos = new ObjectOutputStream(outputStream);
-            is = socket.getInputStream();
+            InputStream is = socket.getInputStream();
             input = new ObjectInputStream(is);
         } catch (IOException e) {
-            LoginController.getInstance().showErrorDialog("Could not connect to server");
+            DialogsUtil.showErrorDialog("Could not connect to server");
             logger.error("Could not Connect");
         }
         logger.info("Connection accepted " + socket.getInetAddress() + ":" + socket.getPort());
 
         try {
-            connect();
+            sendConnectMsg();
             logger.info("Sockets in and out ready!");
             while (socket.isConnected()) {
-                Message message = null;
-                message = (Message) input.readObject();
+                Message message = (Message) input.readObject();
 
                 if (message != null) {
-                    logger.debug("Message recieved:" + message.getText() + " MessageType:" + message.getType() + "Name:" + message.getName());
+                    logger.debug("Message received:" + message.getText() + " MessageType:" + message.getType() + "Name:" + message.getName());
                     switch (message.getType()) {
                         case USER:
                             controller.addToChat(message);
@@ -106,11 +107,7 @@ public class Listener implements Runnable {
                             controller.addAsServer(message);
                             break;
                         case CONNECTED:
-                            controller.setUserList(message);
-                            break;
                         case DISCONNECTED:
-                            controller.setUserList(message);
-                            break;
                         case STATUS:
                             controller.setUserList(message);
                             break;

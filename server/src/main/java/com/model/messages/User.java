@@ -11,6 +11,12 @@ public class User implements Serializable {
     String picture;
     Status status;
 
+    public User(String name, String picture, Status status) {
+        this.name = name;
+        this.picture = picture;
+        this.status = status;
+    }
+
     public String getName() {
         return name;
     }

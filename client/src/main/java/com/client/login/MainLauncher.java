@@ -9,6 +9,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
+import java.io.IOException;
+
 public class MainLauncher extends Application {
 
     private static Stage primaryStageObj;
@@ -22,7 +24,7 @@ public class MainLauncher extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws IOException {
         primaryStageObj = primaryStage;
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("views/LoginView.fxml"));
         primaryStage.initStyle(StageStyle.UNDECORATED);

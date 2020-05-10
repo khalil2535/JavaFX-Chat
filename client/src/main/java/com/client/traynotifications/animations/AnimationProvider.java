@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class AnimationProvider {
 
-    private List<TrayAnimation> animationsList;
+    private final List<TrayAnimation> animationsList;
 
     public AnimationProvider(TrayAnimation... animations) {
         animationsList = new ArrayList<>();

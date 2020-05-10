@@ -19,7 +19,7 @@ class CellRenderer implements Callback<ListView<User>, ListCell<User>> {
     @Override
     public ListCell<User> call(ListView<User> p) {
 
-        ListCell<User> cell = new ListCell<User>() {
+        return new ListCell<User>() {
 
             @Override
             protected void updateItem(User user, boolean bln) {
@@ -46,6 +46,5 @@ class CellRenderer implements Callback<ListView<User>, ListCell<User>> {
                 }
             }
         };
-        return cell;
     }
 }

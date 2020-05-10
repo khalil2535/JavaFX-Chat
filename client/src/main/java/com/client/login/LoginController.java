@@ -16,6 +16,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -40,17 +41,21 @@ import java.util.ResourceBundle;
 public class LoginController implements Initializable {
     public static ChatController chatController;
     @FXML
-    public TextField hostnameTextfield;
+    public TextField hostnameTextField;
     @FXML
-    private ImageView Defaultview;
+    public Button closeButton;
     @FXML
-    private ImageView Sarahview;
+    public Label versionLabel;
     @FXML
-    private ImageView Dominicview;
+    private ImageView DefaultView;
     @FXML
-    private TextField portTextfield;
+    private ImageView SarahView;
     @FXML
-    private TextField usernameTextfield;
+    private ImageView DominicView;
+    @FXML
+    private TextField portTextField;
+    @FXML
+    private TextField usernameTextField;
     @FXML
     private ChoiceBox<String> imagePicker;
     @FXML
@@ -62,10 +67,10 @@ public class LoginController implements Initializable {
     private Scene scene;
 
 
-    public void loginButtonAction() throws IOException {
-        String hostname = hostnameTextfield.getText();
-        int port = Integer.parseInt(portTextfield.getText());
-        String username = usernameTextfield.getText();
+    public void loginButtonAction() {
+        String hostname = hostnameTextField.getText();
+        int port = Integer.parseInt(portTextField.getText());
+        String username = usernameTextField.getText();
         String picture = selectedPicture.getText();
 
         Client client = new Client(username, picture, Status.ONLINE, port, hostname);
@@ -83,16 +88,11 @@ public class LoginController implements Initializable {
         } catch (IOException ex) {
             DialogsUtil.showErrorDialog("Could not connect to server\n please check hostname and port");
         }
-
-
-        // TODO change this here
-//        Listener listener = new Listener(hostname, port, username, picture, chatController);
-//        new Thread(listener).start();
     }
 
-    public void showScene() { // TODO change this here
+    public void showScene() {
         Platform.runLater(() -> {
-            Stage stage = (Stage) hostnameTextfield.getScene().getWindow();
+            Stage stage = (Stage) hostnameTextField.getScene().getWindow();
             stage.setResizable(false);
 
             stage.setOnCloseRequest((WindowEvent e) -> {
@@ -104,7 +104,7 @@ public class LoginController implements Initializable {
             stage.setMinHeight(300);
             ResizeHelper.addResizeListener(stage);
             stage.centerOnScreen();
-            chatController.setUsernameLabel(usernameTextfield.getText());
+            chatController.setUsernameLabel(usernameTextField.getText());
             chatController.setImageLabel(selectedPicture.getText());
         });
     }
@@ -121,26 +121,26 @@ public class LoginController implements Initializable {
                     if (oldPicture != null) {
                         switch (oldPicture) {
                             case "Default":
-                                Defaultview.setVisible(false);
+                                DefaultView.setVisible(false);
                                 break;
                             case "Dominic":
-                                Dominicview.setVisible(false);
+                                DominicView.setVisible(false);
                                 break;
                             case "Sarah":
-                                Sarahview.setVisible(false);
+                                SarahView.setVisible(false);
                                 break;
                         }
                     }
                     if (newPicture != null) {
                         switch (newPicture) {
                             case "Default":
-                                Defaultview.setVisible(true);
+                                DefaultView.setVisible(true);
                                 break;
                             case "Dominic":
-                                Dominicview.setVisible(true);
+                                DominicView.setVisible(true);
                                 break;
                             case "Sarah":
-                                Sarahview.setVisible(true);
+                                SarahView.setVisible(true);
                                 break;
                         }
                     }
@@ -202,8 +202,10 @@ public class LoginController implements Initializable {
                 System.out.println("default");
         }
 
-        r1.setFill(Color.web("#F89406"));
-        r1.setOpacity(0.1);
+        if (r1 != null) {
+            r1.setFill(Color.web("#F89406"));
+            r1.setOpacity(0.1);
+        }
 
         KeyFrame keyFrame = new KeyFrame(Duration.millis(speedOfSquare * 1000), moveXAxis, moveYAxis);
         Timeline timeline = new Timeline();
@@ -240,7 +242,7 @@ public class LoginController implements Initializable {
     }
 
     @FXML
-    private void handleMouseReleased(MouseEvent event) {
+    private void handleMouseReleased() {
         borderPane.setCursor(Cursor.DEFAULT);
     }
 }

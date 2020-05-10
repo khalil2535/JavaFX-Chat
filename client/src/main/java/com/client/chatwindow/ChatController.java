@@ -9,8 +9,6 @@ import com.model.messages.Message;
 import com.model.messages.Status;
 import com.model.messages.User;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -21,10 +19,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -46,6 +41,10 @@ import java.util.ResourceBundle;
 
 public class ChatController implements Initializable {
 
+    @FXML
+    public Button buttonSend;
+    @FXML
+    public HBox onlineUsersHbox;
     @FXML
     ListView<HBox> chatPane;
     @FXML
@@ -97,13 +96,11 @@ public class ChatController implements Initializable {
             }
         };
 
-        othersMessages.setOnSucceeded(event -> {
-            chatPane.getItems().add(othersMessages.getValue());
-        });
+        othersMessages.setOnSucceeded(event -> chatPane.getItems().add(othersMessages.getValue()));
 
         Task<HBox> yourMessages = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
+            public HBox call() {
                 Image image = userImageView.getImage();
                 ImageView profileImage = new ImageView(image);
                 profileImage.setFitHeight(32);
@@ -140,7 +137,7 @@ public class ChatController implements Initializable {
         this.usernameLabel.setText(username);
     }
 
-    public void setImageLabel() throws IOException {
+    public void setImageLabel() {
         this.userImageView.setImage(new Image(getClass().getClassLoader().getResource("images/dominic.png").toString()));
     }
 
@@ -197,7 +194,7 @@ public class ChatController implements Initializable {
     public synchronized void addAsServer(Message msg) {
         Task<HBox> task = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
+            public HBox call() {
                 BubbledLabel bl6 = new BubbledLabel();
                 bl6.setText(msg.getText());
                 bl6.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE,
@@ -209,9 +206,7 @@ public class ChatController implements Initializable {
                 return x;
             }
         };
-        task.setOnSucceeded(event -> {
-            chatPane.getItems().add(task.getValue());
-        });
+        task.setOnSucceeded(event -> chatPane.getItems().add(task.getValue()));
 
         Thread t = new Thread(task);
         t.setDaemon(true);
@@ -250,11 +245,8 @@ public class ChatController implements Initializable {
             }
         }).start();
 
-        try {
-            setImageLabel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        setImageLabel();
+
         /* Drag and Drop */
         borderPane.setOnMousePressed(event -> {
             xOffset = App.getStage().getX() - event.getScreenX();
@@ -268,17 +260,13 @@ public class ChatController implements Initializable {
 
         });
 
-        borderPane.setOnMouseReleased(event -> {
-            borderPane.setCursor(Cursor.DEFAULT);
-        });
+        borderPane.setOnMouseReleased(event -> borderPane.setCursor(Cursor.DEFAULT));
 
-        statusComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                try {
-                    App.getClient().sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        statusComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                App.getClient().sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
 
@@ -310,6 +298,7 @@ public class ChatController implements Initializable {
         }
     }
 
+    @FXML
     public void logoutScene() {
         Platform.runLater(() -> {
             FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("/views/LoginView.fxml"));
@@ -319,10 +308,14 @@ public class ChatController implements Initializable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Stage stage = App.getStage();
-            Scene scene = new Scene(window);
-            stage.setScene(scene);
-            stage.centerOnScreen();
+            if (window != null) {
+                Stage stage = App.getStage();
+                Scene scene = new Scene(window);
+                stage.setScene(scene);
+                stage.centerOnScreen();
+            } else {
+                logger.error("Log out error, windows is null");
+            }
         });
     }
 }

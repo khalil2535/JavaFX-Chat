@@ -10,7 +10,7 @@ import javafx.stage.StageStyle;
 public class CustomStage extends Stage {
 
     private final Location bottomRight;
-    private SimpleDoubleProperty xLocationProperty = new SimpleDoubleProperty() {
+    private final SimpleDoubleProperty xLocationProperty = new SimpleDoubleProperty() {
         @Override
         public void set(double newValue) {
             setX(newValue);
@@ -21,7 +21,7 @@ public class CustomStage extends Stage {
             return getX();
         }
     };
-    private SimpleDoubleProperty yLocationProperty = new SimpleDoubleProperty() {
+    private final SimpleDoubleProperty yLocationProperty = new SimpleDoubleProperty() {
         @Override
         public void set(double newValue) {
             setY(newValue);

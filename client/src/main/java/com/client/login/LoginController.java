@@ -1,9 +1,11 @@
 package com.client.login;
 
 import com.client.App;
+import com.client.Client;
 import com.client.chatwindow.ChatController;
-import com.client.chatwindow.Listener;
+import com.client.util.DialogsUtil;
 import com.client.util.ResizeHelper;
+import com.model.messages.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -66,22 +68,32 @@ public class LoginController implements Initializable {
         String username = usernameTextfield.getText();
         String picture = selectedPicture.getText();
 
+        Client client = new Client(username, picture, Status.ONLINE, port, hostname);
+        try {
+            client.connect();
+
+            App.setClient(client);
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
+            Parent window = (Pane) fxmlLoader.load();
+            chatController = fxmlLoader.getController();
+            this.showScene();
+            this.scene = new Scene(window);
+
+        } catch (IOException ex) {
+            DialogsUtil.showErrorDialog("Could not connect to server\n please check hostname and port");
+        }
+
+
         // TODO change this here
-        Listener listener = new Listener(hostname, port, username, picture, chatController);
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
-        Parent window = (Pane) fxmlLoader.load();
-        chatController = fxmlLoader.getController();
-        new Thread(listener).start();
-        this.showScene();
-        this.scene = new Scene(window);
+//        Listener listener = new Listener(hostname, port, username, picture, chatController);
+//        new Thread(listener).start();
     }
 
     public void showScene() { // TODO change this here
         Platform.runLater(() -> {
             Stage stage = (Stage) hostnameTextfield.getScene().getWindow();
-            stage.setResizable(true);
-            stage.setWidth(1040);
-            stage.setHeight(620);
+            stage.setResizable(false);
 
             stage.setOnCloseRequest((WindowEvent e) -> {
                 Platform.exit();

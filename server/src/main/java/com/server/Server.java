@@ -18,7 +18,7 @@ public class Server {
     private static final int PORT = 9001;
     private static final HashSet<ObjectOutputStream> writers = new HashSet<>();
     private static final ArrayList<User> users = new ArrayList<>();
-    static Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) {
         logger.info("The chat server is running.");
@@ -86,7 +86,8 @@ public class Server {
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
-                logger.error("Exception in run() method for user: " + user.getName(), e.getMessage());
+                logger.error("Exception in run() method for user: " + (user != null ? user.getName() : "no user"),
+                        e.getMessage());
             } finally {
                 closeConnections();
             }

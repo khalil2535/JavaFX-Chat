@@ -1,6 +1,5 @@
 package com.client;
 
-import com.client.chatwindow.Listener;
 import com.model.messages.Message;
 import com.model.messages.MessageType;
 import com.model.messages.Status;
@@ -15,11 +14,12 @@ import static com.model.messages.MessageType.CONNECTED;
 
 public class Client {
     private final User user;
-    private final Logger logger = LoggerFactory.getLogger(Listener.class);
+    private final Logger logger = LoggerFactory.getLogger(Client.class);
     private final String hostname;
     private final int port;
     private ObjectInputStream ois;
     private ObjectOutputStream oos;
+    private Socket socket;
 
     Client(User user, int port, String hostname) {
         this.hostname = hostname;
@@ -27,15 +27,13 @@ public class Client {
         this.user = user;
     }
 
-    Client(String username, String picture, Status status, int port, String hostname) {
-        this.hostname = hostname;
-        this.port = port;
-        this.user = new User(username, picture, status);
+    public Client(String username, String picture, Status status, int port, String hostname) {
+        this(new User(username, picture, status), port, hostname);
     }
 
     /* This method is used to send a connecting message */
     public void connect() throws IOException {
-        Socket socket = new Socket(hostname, port);
+        socket = new Socket(hostname, port);
         OutputStream outputStream = socket.getOutputStream();
         oos = new ObjectOutputStream(outputStream);
         InputStream is = socket.getInputStream();
@@ -89,6 +87,10 @@ public class Client {
                 return message;
             }
         }
+    }
+
+    public boolean isConnected() {
+        return socket != null && socket.isConnected();
     }
 
 }

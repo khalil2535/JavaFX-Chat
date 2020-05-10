@@ -3,7 +3,6 @@ package com.client.chatwindow;
 import com.client.App;
 import com.client.bubble.BubbleSpec;
 import com.client.bubble.BubbledLabel;
-import com.client.login.MainLauncher;
 import com.client.traynotifications.animations.AnimationType;
 import com.client.traynotifications.notification.TrayNotification;
 import com.model.messages.Message;
@@ -72,7 +71,7 @@ public class ChatController implements Initializable {
     public void sendButtonAction() throws IOException {
         String msg = messageBox.getText();
         if (!messageBox.getText().isEmpty()) {
-            Listener.send(msg);
+            App.getClient().sendMessage(msg);
             messageBox.clear();
         }
     }
@@ -93,7 +92,6 @@ public class ChatController implements Initializable {
                 HBox x = new HBox();
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
                 x.getChildren().addAll(profileImage, bl6);
-                logger.debug("ONLINE USERS: " + msg.getUsers().size());
                 setOnlineLabel(Integer.toString(msg.getOnlineCount()));
                 return x;
             }
@@ -222,6 +220,36 @@ public class ChatController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        new Thread(() -> {
+            while (App.getClient().isConnected()) {
+                Message message = null;
+                try {
+                    message = App.getClient().getNewMessage();
+                } catch (IOException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                if (message != null) {
+                    switch (message.getType()) {
+                        case USER:
+                            addToChat(message);
+                            break;
+                        case NOTIFICATION:
+                            newUserNotification(message);
+                            break;
+                        case SERVER:
+                            addAsServer(message);
+                            break;
+                        case CONNECTED:
+                        case DISCONNECTED:
+                        case STATUS:
+                            setUserList(message);
+                            break;
+                    }
+                }
+            }
+        }).start();
+
         try {
             setImageLabel();
         } catch (IOException e) {
@@ -247,7 +275,7 @@ public class ChatController implements Initializable {
         statusComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 try {
-                    Listener.sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
+                    App.getClient().sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -293,9 +321,6 @@ public class ChatController implements Initializable {
             }
             Stage stage = App.getStage();
             Scene scene = new Scene(window);
-            stage.setMaxWidth(350);
-            stage.setMaxHeight(420);
-            stage.setResizable(false);
             stage.setScene(scene);
             stage.centerOnScreen();
         });

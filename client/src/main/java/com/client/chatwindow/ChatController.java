@@ -1,16 +1,15 @@
 package com.client.chatwindow;
 
-import com.client.login.MainLauncher;
-import com.messages.Message;
-import com.messages.Status;
-import com.messages.User;
-import com.messages.bubble.BubbleSpec;
-import com.messages.bubble.BubbledLabel;
-import com.traynotifications.animations.AnimationType;
-import com.traynotifications.notification.TrayNotification;
+import com.client.App;
+import com.client.bubble.BubbleSpec;
+import com.client.bubble.BubbledLabel;
+import com.client.traynotifications.animations.AnimationType;
+import com.client.traynotifications.notification.TrayNotification;
+import com.client.util.DialogsUtil;
+import com.model.messages.Message;
+import com.model.messages.Status;
+import com.model.messages.User;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -43,25 +42,41 @@ import java.util.ResourceBundle;
 
 public class ChatController implements Initializable {
 
-    @FXML private TextArea messageBox;
-    @FXML private Label usernameLabel;
-    @FXML private Label onlineCountLabel;
-    @FXML private ListView userList;
-    @FXML private ImageView userImageView;
-    @FXML ListView chatPane;
-    @FXML ListView statusList;
-    @FXML BorderPane borderPane;
-    @FXML ComboBox statusComboBox;
-
+    @FXML
+    public Button buttonSend;
+    @FXML
+    public HBox onlineUsersHbox;
+    @FXML
+    ListView<HBox> chatPane;
+    @FXML
+    ListView statusList;
+    @FXML
+    BorderPane borderPane;
+    @FXML
+    ComboBox<String> statusComboBox;
+    Logger logger = LoggerFactory.getLogger(ChatController.class);
+    @FXML
+    private TextArea messageBox;
+    @FXML
+    private Label usernameLabel;
+    @FXML
+    private Label onlineCountLabel;
+    @FXML
+    private ListView<User> userList;
+    @FXML
+    private ImageView userImageView;
     private double xOffset;
     private double yOffset;
-    Logger logger = LoggerFactory.getLogger(ChatController.class);
-
 
     public void sendButtonAction() throws IOException {
         String msg = messageBox.getText();
         if (!messageBox.getText().isEmpty()) {
-            Listener.send(msg);
+            try {
+                App.getClient().sendMessage(msg);
+            } catch (Exception e) {
+                DialogsUtil.showErrorDialog("error in encryption the message");
+                e.printStackTrace();
+            }
             messageBox.clear();
         }
     }
@@ -70,18 +85,24 @@ public class ChatController implements Initializable {
     public synchronized void addToChat(Message msg) {
         Task<HBox> othersMessages = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
-                Image image = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() + ".png").toString());
+            public HBox call() {
+                String imagePath = "images/" + msg.getPicture().toLowerCase() + ".png";
+                Image image = new Image(getClass().getClassLoader().getResource(imagePath).toString());
+
+                String userName = msg.getName();
+                String msgText = msg.getTextDecrypted(App.getClient().key);
+
                 ImageView profileImage = new ImageView(image);
                 profileImage.setFitHeight(32);
                 profileImage.setFitWidth(32);
+
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getName() + ": " + msg.getMsg());
-                bl6.setBackground(new Background(new BackgroundFill(Color.WHITE,null, null)));
-                HBox x = new HBox();
+                bl6.setText(userName + ": " + msgText);
+                bl6.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
+
+                HBox x = new HBox();
                 x.getChildren().addAll(profileImage, bl6);
-                logger.debug("ONLINE USERS: " + Integer.toString(msg.getUserlist().size()));
                 setOnlineLabel(Integer.toString(msg.getOnlineCount()));
                 return x;
             }
@@ -93,14 +114,14 @@ public class ChatController implements Initializable {
 
         Task<HBox> yourMessages = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
+            public HBox call() {
                 Image image = userImageView.getImage();
                 ImageView profileImage = new ImageView(image);
                 profileImage.setFitHeight(32);
                 profileImage.setFitWidth(32);
 
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getMsg());
+                bl6.setText(msg.getTextDecrypted(App.getClient().key));
                 bl6.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN,
                         null, null)));
                 HBox x = new HBox();
@@ -125,16 +146,17 @@ public class ChatController implements Initializable {
             t.start();
         }
     }
+
     public void setUsernameLabel(String username) {
         this.usernameLabel.setText(username);
     }
 
-    public void setImageLabel() throws IOException {
+    public void setImageLabel() {
         this.userImageView.setImage(new Image(getClass().getClassLoader().getResource("images/dominic.png").toString()));
     }
 
-    public void setOnlineLabel(String usercount) {
-        Platform.runLater(() -> onlineCountLabel.setText(usercount));
+    public void setOnlineLabel(String userCount) {
+        Platform.runLater(() -> onlineCountLabel.setText(userCount));
     }
 
     public void setUserList(Message msg) {
@@ -143,7 +165,7 @@ public class ChatController implements Initializable {
             ObservableList<User> users = FXCollections.observableList(msg.getUsers());
             userList.setItems(users);
             userList.setCellFactory(new CellRenderer());
-            setOnlineLabel(String.valueOf(msg.getUserlist().size()));
+            setOnlineLabel(String.valueOf(msg.getUsers().size()));
         });
         logger.info("setUserList() method Exit");
     }
@@ -151,7 +173,7 @@ public class ChatController implements Initializable {
     /* Displays Notification when a user joins */
     public void newUserNotification(Message msg) {
         Platform.runLater(() -> {
-            Image profileImg = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() +".png").toString(),50,50,false,false);
+            Image profileImg = new Image(getClass().getClassLoader().getResource("images/" + msg.getPicture().toLowerCase() + ".png").toString(), 50, 50, false, false);
             TrayNotification tray = new TrayNotification();
             tray.setTitle("A new user has joined!");
             tray.setMessage(msg.getName() + " has joined the JavaFX Chatroom!");
@@ -184,11 +206,14 @@ public class ChatController implements Initializable {
 
     /* Method to display server messages */
     public synchronized void addAsServer(Message msg) {
+
+        logger.info("add as server");
+
         Task<HBox> task = new Task<HBox>() {
             @Override
-            public HBox call() throws Exception {
+            public HBox call() {
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getMsg());
+                bl6.setText(msg.getText());
                 bl6.setBackground(new Background(new BackgroundFill(Color.ALICEBLUE,
                         null, null)));
                 HBox x = new HBox();
@@ -198,9 +223,7 @@ public class ChatController implements Initializable {
                 return x;
             }
         };
-        task.setOnSucceeded(event -> {
-            chatPane.getItems().add(task.getValue());
-        });
+        task.setOnSucceeded(event -> chatPane.getItems().add(task.getValue()));
 
         Thread t = new Thread(task);
         t.setDaemon(true);
@@ -209,35 +232,64 @@ public class ChatController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        try {
-            setImageLabel();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-                /* Drag and Drop */
+        new Thread(() -> {
+            int errors = 0;
+            while (App.getClient().isConnected() && errors < 5) {
+                Message message = null;
+                try {
+                    message = App.getClient().getNewMessage();
+                    errors = 0;
+                } catch (IOException | ClassNotFoundException e) {
+                    DialogsUtil.showErrorDialog("error in receiving message");
+                    e.printStackTrace();
+                    errors++;
+                }
+
+                if (message != null) {
+                    switch (message.getType()) {
+                        case USER:
+                            addToChat(message);
+                            break;
+                        case NOTIFICATION:
+                            newUserNotification(message);
+                            break;
+                        case SERVER:
+                            addAsServer(message);
+                            break;
+                        case CONNECTED:
+                        case DISCONNECTED:
+                        case STATUS:
+                            setUserList(message);
+                            break;
+                    }
+                } else {
+                    logger.info("message is null !");
+                }
+            }
+        }).start();
+
+        setImageLabel();
+
+        /* Drag and Drop */
         borderPane.setOnMousePressed(event -> {
-            xOffset = MainLauncher.getPrimaryStage().getX() - event.getScreenX();
-            yOffset = MainLauncher.getPrimaryStage().getY() - event.getScreenY();
+            xOffset = App.getStage().getX() - event.getScreenX();
+            yOffset = App.getStage().getY() - event.getScreenY();
             borderPane.setCursor(Cursor.CLOSED_HAND);
         });
 
         borderPane.setOnMouseDragged(event -> {
-            MainLauncher.getPrimaryStage().setX(event.getScreenX() + xOffset);
-            MainLauncher.getPrimaryStage().setY(event.getScreenY() + yOffset);
+            App.getStage().setX(event.getScreenX() + xOffset);
+            App.getStage().setY(event.getScreenY() + yOffset);
 
         });
 
-        borderPane.setOnMouseReleased(event -> {
-            borderPane.setCursor(Cursor.DEFAULT);
-        });
+        borderPane.setOnMouseReleased(event -> borderPane.setCursor(Cursor.DEFAULT));
 
-        statusComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                try {
-                    Listener.sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        statusComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                App.getClient().sendStatusUpdate(Status.valueOf(newValue.toUpperCase()));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
 
@@ -269,6 +321,7 @@ public class ChatController implements Initializable {
         }
     }
 
+    @FXML
     public void logoutScene() {
         Platform.runLater(() -> {
             FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("/views/LoginView.fxml"));
@@ -278,13 +331,14 @@ public class ChatController implements Initializable {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Stage stage = MainLauncher.getPrimaryStage();
-            Scene scene = new Scene(window);
-            stage.setMaxWidth(350);
-            stage.setMaxHeight(420);
-            stage.setResizable(false);
-            stage.setScene(scene);
-            stage.centerOnScreen();
+            if (window != null) {
+                Stage stage = App.getStage();
+                Scene scene = new Scene(window);
+                stage.setScene(scene);
+                stage.centerOnScreen();
+            } else {
+                logger.error("Log out error, windows is null");
+            }
         });
     }
 }

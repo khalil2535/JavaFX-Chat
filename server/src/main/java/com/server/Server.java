@@ -1,57 +1,59 @@
 package com.server;
 
-import com.exception.DuplicateUsernameException;
-import com.messages.Message;
-import com.messages.MessageType;
-import com.messages.Status;
-import com.messages.User;
+import com.model.crypto.AES;
+import com.model.crypto.RSA;
+import com.model.messages.Message;
+import com.model.messages.MessageType;
+import com.model.messages.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class Server {
 
     /* Setting up variables */
     private static final int PORT = 9001;
-    private static final HashMap<String, User> names = new HashMap<>();
-    private static HashSet<ObjectOutputStream> writers = new HashSet<>();
-    private static ArrayList<User> users = new ArrayList<>();
-    static Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final HashSet<ObjectOutputStream> writers = new HashSet<>();
+    private static final ArrayList<User> users = new ArrayList<>();
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final String key = AES.generateKey();
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         logger.info("The chat server is running.");
-        ServerSocket listener = new ServerSocket(PORT);
 
-        try {
+        try (ServerSocket listener = new ServerSocket(PORT)) {
             while (true) {
                 new Handler(listener.accept()).start();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            listener.close();
         }
+    }
+
+    private static User getUser(String name) {
+        for (User user : users) {
+            if (user.getName().equals(name)) return user;
+        }
+        return null;
     }
 
 
     private static class Handler extends Thread {
-        private String name;
-        private Socket socket;
-        private Logger logger = LoggerFactory.getLogger(Handler.class);
+        private final Socket socket;
+        private final Logger logger = LoggerFactory.getLogger(Handler.class);
         private User user;
-        private ObjectInputStream input;
+        private ObjectInputStream ois;
         private OutputStream os;
-        private ObjectOutputStream output;
+        private ObjectOutputStream oos;
         private InputStream is;
+        private String userKey;
 
-        public Handler(Socket socket) throws IOException {
+        public Handler(Socket socket) {
             this.socket = socket;
         }
 
@@ -59,118 +61,123 @@ public class Server {
             logger.info("Attempting to connect a user...");
             try {
                 is = socket.getInputStream();
-                input = new ObjectInputStream(is);
+                ois = new ObjectInputStream(is);
                 os = socket.getOutputStream();
-                output = new ObjectOutputStream(os);
+                oos = new ObjectOutputStream(os);
 
-                Message firstMessage = (Message) input.readObject();
+                Message firstMessage = (Message) ois.readObject();
+                this.userKey = firstMessage.getText();
                 checkDuplicateUsername(firstMessage);
-                writers.add(output);
-                sendNotification(firstMessage);
+                try {
+                    sendKey(oos);
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                    e.printStackTrace();
+                }
+
+                writers.add(oos);
+                sendNotification(firstMessage.getName(), firstMessage.getPicture());
                 addToList();
 
                 while (socket.isConnected()) {
-                    Message inputmsg = (Message) input.readObject();
-                    if (inputmsg != null) {
-                        logger.info(inputmsg.getType() + " - " + inputmsg.getName() + ": " + inputmsg.getMsg());
-                        switch (inputmsg.getType()) {
+                    Message inputMsg = (Message) ois.readObject();
+                    if (inputMsg != null) {
+                        logger.info(inputMsg.getType() + " - " + inputMsg.getName() + ": ");
+                        switch (inputMsg.getType()) {
                             case USER:
-                                write(inputmsg);
+                                sendToAll(inputMsg);
                                 break;
                             case CONNECTED:
                                 addToList();
                                 break;
                             case STATUS:
-                                changeStatus(inputmsg);
+                                changeStatus(inputMsg);
                                 break;
+                            case DISCONNECTED:
+                                closeConnections();
+                                return;
                         }
                     }
                 }
-            } catch (SocketException socketException) {
-                logger.error("Socket Exception for user " + name);
-            } catch (DuplicateUsernameException duplicateException){
-                logger.error("Duplicate Username : " + name);
-            } catch (Exception e){
-                logger.error("Exception in run() method for user: " + name, e);
+            } catch (IOException | ClassNotFoundException e) {
+                logger.error("Exception in run() method for user: " + (user != null ? user.getName() : "no user"),
+                        e.getMessage());
             } finally {
                 closeConnections();
             }
         }
 
-        private Message changeStatus(Message inputmsg) throws IOException {
-            logger.debug(inputmsg.getName() + " has changed status to  " + inputmsg.getStatus());
+        private void sendKey(ObjectOutputStream writer) throws Exception {
             Message msg = new Message();
-            msg.setName(user.getName());
-            msg.setType(MessageType.STATUS);
-            msg.setMsg("");
-            User userObj = names.get(name);
-            userObj.setStatus(inputmsg.getStatus());
-            write(msg);
-            return msg;
+            msg.setText(RSA.encrypt(key, userKey));
+            msg.setType(MessageType.CONNECTED);
+            msg.setName("SERVER");
+            writer.writeObject(msg);
         }
 
-        private synchronized void checkDuplicateUsername(Message firstMessage) throws DuplicateUsernameException {
+        private void changeStatus(Message inputMsg) throws IOException {
+            logger.debug(inputMsg.getName() + " has changed status to  " + inputMsg.getStatus());
+            sendToAll(inputMsg);
+        }
+
+        private synchronized void checkDuplicateUsername(Message firstMessage) {
             logger.info(firstMessage.getName() + " is trying to connect");
-            if (!names.containsKey(firstMessage.getName())) {
-                this.name = firstMessage.getName();
-                user = new User();
-                user.setName(firstMessage.getName());
-                user.setStatus(Status.ONLINE);
-                user.setPicture(firstMessage.getPicture());
+
+            if (getUser(firstMessage.getName()) != null) {
+                user = new User(firstMessage.getName(),
+                        firstMessage.getPicture(),
+                        firstMessage.getStatus());
 
                 users.add(user);
-                names.put(name, user);
-
-                logger.info(name + " has been added to the list");
+                logger.info(user.getName() + " has been added to the list");
             } else {
                 logger.error(firstMessage.getName() + " is already connected");
-                throw new DuplicateUsernameException(firstMessage.getName() + " is already connected");
             }
         }
 
-        private Message sendNotification(Message firstMessage) throws IOException {
+        /**
+         * TODO separate send notification and public key
+         */
+        private void sendNotification(String name, String picture) throws IOException {
             Message msg = new Message();
-            msg.setMsg("has joined the chat.");
+            // TODO use this to send RSA public key to all users
+            msg.setText("has joined the chat.");
             msg.setType(MessageType.NOTIFICATION);
-            msg.setName(firstMessage.getName());
-            msg.setPicture(firstMessage.getPicture());
-            write(msg);
-            return msg;
+            msg.setName(name);
+            msg.setPicture(picture);
+            sendToAll(msg);
         }
 
 
-        private Message removeFromList() throws IOException {
+        private void removeFromList() throws IOException {
             logger.debug("removeFromList() method Enter");
             Message msg = new Message();
-            msg.setMsg("has left the chat.");
+            msg.setText("has left the chat.");
             msg.setType(MessageType.DISCONNECTED);
             msg.setName("SERVER");
-            msg.setUserlist(names);
-            write(msg);
+            msg.setUsers(users);
+            sendToAll(msg);
             logger.debug("removeFromList() method Exit");
-            return msg;
         }
 
         /*
          * For displaying that a user has joined the server
          */
-        private Message addToList() throws IOException {
+        private void addToList() throws IOException {
             Message msg = new Message();
-            msg.setMsg("Welcome, You have now joined the server! Enjoy chatting!");
+            // TODO put here the encryption key(s)
+            msg.setText("Welcome, You have now joined the server! Enjoy chatting!");
             msg.setType(MessageType.CONNECTED);
             msg.setName("SERVER");
-            write(msg);
-            return msg;
+            sendToAll(msg);
         }
 
         /*
          * Creates and sends a Message type to the listeners.
          */
-        private void write(Message msg) throws IOException {
+        private void sendToAll(Message msg) throws IOException {
             for (ObjectOutputStream writer : writers) {
-                msg.setUserlist(names);
                 msg.setUsers(users);
-                msg.setOnlineCount(names.size());
                 writer.writeObject(msg);
                 writer.reset();
             }
@@ -179,49 +186,51 @@ public class Server {
         /*
          * Once a user has been disconnected, we close the open connections and remove the writers
          */
-        private synchronized void closeConnections()  {
+        private synchronized void closeConnections() {
             logger.debug("closeConnections() method Enter");
-            logger.info("HashMap names:" + names.size() + " writers:" + writers.size() + " usersList size:" + users.size());
-            if (name != null) {
-                names.remove(name);
-                logger.info("User: " + name + " has been removed!");
-            }
-            if (user != null){
-                users.remove(user);
-                logger.info("User object: " + user + " has been removed!");
-            }
-            if (output != null){
-                writers.remove(output);
-                logger.info("Writer object: " + user + " has been removed!");
-            }
-            if (is != null){
+            logger.info("HashMap names:" + users.size() + " writers:" + writers.size() + " users:" + users.size());
+            if (user != null) {
+                if (user.getName() != null) {
+                    users.remove(user);
+                    logger.info("User: " + user.getName() + " has been removed!");
+                }
+                if (user != null) {
+                    users.remove(user);
+                    logger.info("User object: " + user + " has been removed!");
+                }
+                if (oos != null) {
+                    writers.remove(oos);
+                    logger.info("Writer object: " + user + " has been removed!");
+                }
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (os != null) {
+                    try {
+                        os.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (ois != null) {
+                    try {
+                        ois.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
                 try {
-                    is.close();
-                } catch (IOException e) {
+                    removeFromList();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+                logger.info("HashMap names:" + users.size() + " writers:" + writers.size() + " usersList size:" + users.size());
+                logger.debug("closeConnections() method Exit");
             }
-            if (os != null){
-                try {
-                    os.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (input != null){
-                try {
-                    input.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            try {
-                removeFromList();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            logger.info("HashMap names:" + names.size() + " writers:" + writers.size() + " usersList size:" + users.size());
-            logger.debug("closeConnections() method Exit");
         }
     }
 }

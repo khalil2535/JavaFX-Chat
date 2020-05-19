@@ -1,22 +1,27 @@
 package com.client.login;
 
+import com.client.App;
+import com.client.Client;
 import com.client.chatwindow.ChatController;
-import com.client.chatwindow.Listener;
+import com.client.util.DialogsUtil;
 import com.client.util.ResizeHelper;
+import com.model.messages.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -25,59 +30,77 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.ResourceBundle;
 
 /**
- *  Created by Dominic on 12-Nov-15.
+ * Created by Dominic on 12-Nov-15.
  */
 public class LoginController implements Initializable {
-    @FXML private ImageView Defaultview;
-    @FXML private ImageView Sarahview;
-    @FXML private ImageView Dominicview;
-    @FXML public  TextField hostnameTextfield;
-    @FXML private TextField portTextfield;
-    @FXML private TextField usernameTextfield;
-    @FXML private ChoiceBox imagePicker;
-    @FXML private Label selectedPicture;
-    public static ChatController con;
-    @FXML private BorderPane borderPane;
+    public static ChatController chatController;
+    @FXML
+    public TextField hostnameTextField;
+    @FXML
+    public Button closeButton;
+    @FXML
+    public Label versionLabel;
+    @FXML
+    private ImageView DefaultView;
+    @FXML
+    private ImageView SarahView;
+    @FXML
+    private ImageView DominicView;
+    @FXML
+    private TextField portTextField;
+    @FXML
+    private TextField usernameTextField;
+    @FXML
+    private ChoiceBox<String> imagePicker;
+    @FXML
+    private Label selectedPicture;
+    @FXML
+    private BorderPane borderPane;
     private double xOffset;
     private double yOffset;
     private Scene scene;
 
-    private static LoginController instance;
 
-    public LoginController() {
-        instance = this;
-    }
-
-    public static LoginController getInstance() {
-        return instance;
-    }
-    public void loginButtonAction() throws IOException {
-        String hostname = hostnameTextfield.getText();
-        int port = Integer.parseInt(portTextfield.getText());
-        String username = usernameTextfield.getText();
+    public void loginButtonAction() {
+        String hostname = hostnameTextField.getText();
+        int port = Integer.parseInt(portTextField.getText());
+        String username = usernameTextField.getText();
         String picture = selectedPicture.getText();
 
-        FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
-        Parent window = (Pane) fmxlLoader.load();
-        con = fmxlLoader.<ChatController>getController();
-        Listener listener = new Listener(hostname, port, username, picture, con);
-        Thread x = new Thread(listener);
-        x.start();
-        this.scene = new Scene(window);
+        Client client = null;
+        try {
+            client = new Client(username, picture, Status.ONLINE, port, hostname);
+        } catch (NoSuchAlgorithmException e) {
+            DialogsUtil.showErrorDialog("Client Error, Couldn't generate key");
+            e.printStackTrace();
+        }
+        try {
+            client.connect();
+
+            App.setClient(client);
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/views/ChatView.fxml"));
+            Parent window = (Pane) fxmlLoader.load();
+            chatController = fxmlLoader.getController();
+            this.showScene();
+            this.scene = new Scene(window);
+
+        } catch (Exception ex) {
+            DialogsUtil.showErrorDialog("Could not connect to server\n please check hostname and port");
+            ex.printStackTrace();
+        }
     }
 
-    public void showScene() throws IOException {
+    public void showScene() {
         Platform.runLater(() -> {
-            Stage stage = (Stage) hostnameTextfield.getScene().getWindow();
-            stage.setResizable(true);
-            stage.setWidth(1040);
-            stage.setHeight(620);
+            Stage stage = (Stage) hostnameTextField.getScene().getWindow();
+            stage.setResizable(false);
 
             stage.setOnCloseRequest((WindowEvent e) -> {
                 Platform.exit();
@@ -88,8 +111,8 @@ public class LoginController implements Initializable {
             stage.setMinHeight(300);
             ResizeHelper.addResizeListener(stage);
             stage.centerOnScreen();
-            con.setUsernameLabel(usernameTextfield.getText());
-            con.setImageLabel(selectedPicture.getText());
+            chatController.setUsernameLabel(usernameTextField.getText());
+            chatController.setImageLabel(selectedPicture.getText());
         });
     }
 
@@ -100,68 +123,51 @@ public class LoginController implements Initializable {
         selectedPicture.setVisible(false);
 
         /* Drag and Drop */
-        borderPane.setOnMousePressed(event -> {
-            xOffset = MainLauncher.getPrimaryStage().getX() - event.getScreenX();
-            yOffset = MainLauncher.getPrimaryStage().getY() - event.getScreenY();
-            borderPane.setCursor(Cursor.CLOSED_HAND);
-        });
-
-        borderPane.setOnMouseDragged(event -> {
-            MainLauncher.getPrimaryStage().setX(event.getScreenX() + xOffset);
-            MainLauncher.getPrimaryStage().setY(event.getScreenY() + yOffset);
-
-        });
-
-        borderPane.setOnMouseReleased(event -> {
-            borderPane.setCursor(Cursor.DEFAULT);
-        });
-
-        imagePicker.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> selected, String oldPicture, String newPicture) {
-                if (oldPicture != null) {
-                    switch (oldPicture) {
-                        case "Default":
-                            Defaultview.setVisible(false);
-                            break;
-                        case "Dominic":
-                            Dominicview.setVisible(false);
-                            break;
-                        case "Sarah":
-                            Sarahview.setVisible(false);
-                            break;
+        imagePicker.getSelectionModel().selectedItemProperty().addListener(
+                (selected, oldPicture, newPicture) -> {
+                    if (oldPicture != null) {
+                        switch (oldPicture) {
+                            case "Default":
+                                DefaultView.setVisible(false);
+                                break;
+                            case "Dominic":
+                                DominicView.setVisible(false);
+                                break;
+                            case "Sarah":
+                                SarahView.setVisible(false);
+                                break;
+                        }
                     }
-                }
-                if (newPicture != null) {
-                    switch (newPicture) {
-                        case "Default":
-                            Defaultview.setVisible(true);
-                            break;
-                        case "Dominic":
-                            Dominicview.setVisible(true);
-                            break;
-                        case "Sarah":
-                            Sarahview.setVisible(true);
-                            break;
+                    if (newPicture != null) {
+                        switch (newPicture) {
+                            case "Default":
+                                DefaultView.setVisible(true);
+                                break;
+                            case "Dominic":
+                                DominicView.setVisible(true);
+                                break;
+                            case "Sarah":
+                                SarahView.setVisible(true);
+                                break;
+                        }
                     }
-                }
-            }
-        });
+                });
+
+
         int numberOfSquares = 30;
-        while (numberOfSquares > 0){
+        while (numberOfSquares > 0) {
             generateAnimation();
             numberOfSquares--;
         }
     }
 
-
     /* This method is used to generate the animation on the login window, It will generate random ints to determine
      * the size, speed, starting points and direction of each square.
      */
-    public void generateAnimation(){
+    public void generateAnimation() {
         Random rand = new Random();
-        int sizeOfSqaure = rand.nextInt(50) + 1;
-        int speedOfSqaure = rand.nextInt(10) + 5;
+        int sizeOfSquare = rand.nextInt(50) + 1;
+        int speedOfSquare = rand.nextInt(10) + 5;
         int startXPoint = rand.nextInt(420);
         int startYPoint = rand.nextInt(350);
         int direction = rand.nextInt(5) + 1;
@@ -170,75 +176,80 @@ public class LoginController implements Initializable {
         KeyValue moveYAxis = null;
         Rectangle r1 = null;
 
-        switch (direction){
-            case 1 :
+        switch (direction) {
+            case 1:
                 // MOVE LEFT TO RIGHT
-                r1 = new Rectangle(0,startYPoint,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
+                r1 = new Rectangle(0, startYPoint, sizeOfSquare, sizeOfSquare);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSquare);
                 break;
-            case 2 :
+            case 2:
                 // MOVE TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSquare, sizeOfSquare);
+                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSquare);
                 break;
-            case 3 :
+            case 3:
+            case 6:
+                //MOVE RIGHT TO LEFT, BOTTOM TO TOP
                 // MOVE LEFT TO RIGHT, TOP TO BOTTOM
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 0, sizeOfSquare, sizeOfSquare);
+                moveXAxis = new KeyValue(r1.xProperty(), 350 - sizeOfSquare);
+                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSquare);
                 break;
-            case 4 :
+            case 4:
                 // MOVE BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint,420-sizeOfSqaure ,sizeOfSqaure,sizeOfSqaure);
+                r1 = new Rectangle(startXPoint, 420 - sizeOfSquare, sizeOfSquare, sizeOfSquare);
                 moveYAxis = new KeyValue(r1.xProperty(), 0);
                 break;
-            case 5 :
+            case 5:
                 // MOVE RIGHT TO LEFT
-                r1 = new Rectangle(420-sizeOfSqaure,startYPoint,sizeOfSqaure,sizeOfSqaure);
+                r1 = new Rectangle(420 - sizeOfSquare, startYPoint, sizeOfSquare, sizeOfSquare);
                 moveXAxis = new KeyValue(r1.xProperty(), 0);
                 break;
-            case 6 :
-                //MOVE RIGHT TO LEFT, BOTTOM TO TOP
-                r1 = new Rectangle(startXPoint,0,sizeOfSqaure,sizeOfSqaure);
-                moveXAxis = new KeyValue(r1.xProperty(), 350 -  sizeOfSqaure);
-                moveYAxis = new KeyValue(r1.yProperty(), 420 - sizeOfSqaure);
-                break;
-
             default:
                 System.out.println("default");
         }
 
-        r1.setFill(Color.web("#F89406"));
-        r1.setOpacity(0.1);
+        if (r1 != null) {
+            r1.setFill(Color.web("#F89406"));
+            r1.setOpacity(0.1);
+        }
 
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(speedOfSqaure * 1000), moveXAxis, moveYAxis);
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(speedOfSquare * 1000), moveXAxis, moveYAxis);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.setAutoReverse(true);
         timeline.getKeyFrames().add(keyFrame);
         timeline.play();
-        borderPane.getChildren().add(borderPane.getChildren().size()-1,r1);
+        borderPane.getChildren().add(borderPane.getChildren().size() - 1, r1);
     }
 
     /* Terminates Application */
-    public void closeSystem(){
+    @FXML
+    public void closeSystem() {
         Platform.exit();
         System.exit(0);
     }
 
-    public void minimizeWindow(){
-        MainLauncher.getPrimaryStage().setIconified(true);
+    @FXML
+    public void minimizeWindow() {
+        App.getStage().setIconified(true);
     }
 
-    /* This displays an alert message to the user */
-    public void showErrorDialog(String message) {
-        Platform.runLater(()-> {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Warning!");
-            alert.setHeaderText(message);
-            alert.setContentText("Please check for firewall issues and check if the server is running.");
-            alert.showAndWait();
-        });
+    @FXML
+    private void handleMousePressed(MouseEvent event) {
+        xOffset = App.getStage().getX() - event.getScreenX();
+        yOffset = App.getStage().getY() - event.getScreenY();
+        borderPane.setCursor(Cursor.CLOSED_HAND);
+    }
 
+    @FXML
+    private void handleMouseDragged(MouseEvent event) {
+        App.getStage().setX(event.getScreenX() + xOffset);
+        App.getStage().setY(event.getScreenY() + yOffset);
+    }
+
+    @FXML
+    private void handleMouseReleased() {
+        borderPane.setCursor(Cursor.DEFAULT);
     }
 }

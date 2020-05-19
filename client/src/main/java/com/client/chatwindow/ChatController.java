@@ -5,6 +5,7 @@ import com.client.bubble.BubbleSpec;
 import com.client.bubble.BubbledLabel;
 import com.client.traynotifications.animations.AnimationType;
 import com.client.traynotifications.notification.TrayNotification;
+import com.client.util.DialogsUtil;
 import com.model.messages.Message;
 import com.model.messages.Status;
 import com.model.messages.User;
@@ -70,7 +71,12 @@ public class ChatController implements Initializable {
     public void sendButtonAction() throws IOException {
         String msg = messageBox.getText();
         if (!messageBox.getText().isEmpty()) {
-            App.getClient().sendMessage(msg);
+            try {
+                App.getClient().sendMessage(msg);
+            } catch (Exception e) {
+                DialogsUtil.showErrorDialog("error in encryption the message");
+                e.printStackTrace();
+            }
             messageBox.clear();
         }
     }
@@ -82,21 +88,29 @@ public class ChatController implements Initializable {
             public HBox call() {
                 String imagePath = "images/" + msg.getPicture().toLowerCase() + ".png";
                 Image image = new Image(getClass().getClassLoader().getResource(imagePath).toString());
+
+                String userName = msg.getName();
+                String msgText = msg.getTextDecrypted(App.getClient().key);
+
                 ImageView profileImage = new ImageView(image);
                 profileImage.setFitHeight(32);
                 profileImage.setFitWidth(32);
+
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getName() + ": " + msg.getText());
+                bl6.setText(userName + ": " + msgText);
                 bl6.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-                HBox x = new HBox();
                 bl6.setBubbleSpec(BubbleSpec.FACE_LEFT_CENTER);
+
+                HBox x = new HBox();
                 x.getChildren().addAll(profileImage, bl6);
                 setOnlineLabel(Integer.toString(msg.getOnlineCount()));
                 return x;
             }
         };
 
-        othersMessages.setOnSucceeded(event -> chatPane.getItems().add(othersMessages.getValue()));
+        othersMessages.setOnSucceeded(event -> {
+            chatPane.getItems().add(othersMessages.getValue());
+        });
 
         Task<HBox> yourMessages = new Task<HBox>() {
             @Override
@@ -107,7 +121,7 @@ public class ChatController implements Initializable {
                 profileImage.setFitWidth(32);
 
                 BubbledLabel bl6 = new BubbledLabel();
-                bl6.setText(msg.getText());
+                bl6.setText(msg.getTextDecrypted(App.getClient().key));
                 bl6.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN,
                         null, null)));
                 HBox x = new HBox();
@@ -141,8 +155,8 @@ public class ChatController implements Initializable {
         this.userImageView.setImage(new Image(getClass().getClassLoader().getResource("images/dominic.png").toString()));
     }
 
-    public void setOnlineLabel(String usercount) {
-        Platform.runLater(() -> onlineCountLabel.setText(usercount));
+    public void setOnlineLabel(String userCount) {
+        Platform.runLater(() -> onlineCountLabel.setText(userCount));
     }
 
     public void setUserList(Message msg) {
@@ -192,6 +206,9 @@ public class ChatController implements Initializable {
 
     /* Method to display server messages */
     public synchronized void addAsServer(Message msg) {
+
+        logger.info("add as server");
+
         Task<HBox> task = new Task<HBox>() {
             @Override
             public HBox call() {
@@ -216,12 +233,16 @@ public class ChatController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         new Thread(() -> {
-            while (App.getClient().isConnected()) {
+            int errors = 0;
+            while (App.getClient().isConnected() && errors < 5) {
                 Message message = null;
                 try {
                     message = App.getClient().getNewMessage();
+                    errors = 0;
                 } catch (IOException | ClassNotFoundException e) {
+                    DialogsUtil.showErrorDialog("error in receiving message");
                     e.printStackTrace();
+                    errors++;
                 }
 
                 if (message != null) {
@@ -241,6 +262,8 @@ public class ChatController implements Initializable {
                             setUserList(message);
                             break;
                     }
+                } else {
+                    logger.info("message is null !");
                 }
             }
         }).start();

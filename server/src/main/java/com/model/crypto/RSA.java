@@ -42,10 +42,10 @@ public class RSA {
         return Base64.getEncoder().encodeToString(encrypted);
     }
 
-    private static PublicKey getPublicKey(PublicKey key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance(TYPE);
-        X509EncodedKeySpec spec = new X509EncodedKeySpec(key.getEncoded());
-        return keyFactory.generatePublic(spec);
+    public static String encrypt(String msg, String key) throws NoSuchAlgorithmException, InvalidKeySpecException,
+            NoSuchPaddingException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+        PublicKey keyFromString = getKeyFromString(key);
+        return encrypt(msg, keyFromString);
     }
 
     /**
@@ -75,6 +75,13 @@ public class RSA {
         return new String(decryptedMsg, UTF8);
     }
 
+    public static String decrypt(String encryptedMsg, String privateKey) throws InvalidKeySpecException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException,
+            NoSuchAlgorithmException {
+        PublicKey keyFromString = getKeyFromString(privateKey);
+        return encrypt(encryptedMsg, keyFromString);
+    }
+
     private static PrivateKey getPrivateKey(PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance(TYPE);
         byte[] priv = privateKey.getEncoded();
@@ -88,4 +95,26 @@ public class RSA {
         return kpg.genKeyPair();
     }
 
+    public static String getPublicKey(KeyPair keyPair) {
+        PublicKey publicKey = keyPair.getPublic();
+        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
+    }
+    public static String getPrivateKey(KeyPair keyPair) {
+        PrivateKey privateKey = keyPair.getPrivate();
+        return Base64.getEncoder().encodeToString(privateKey.getEncoded());
+    }
+
+    public static PublicKey getKeyFromString(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] byteKey = Base64.getDecoder().decode(key.getBytes());
+        X509EncodedKeySpec X509publicKey = new X509EncodedKeySpec(byteKey);
+        KeyFactory kf = KeyFactory.getInstance(TYPE);
+
+        return kf.generatePublic(X509publicKey);
+    }
+
+    public static PublicKey getPublicKey(PublicKey key) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory keyFactory = KeyFactory.getInstance(TYPE);
+        X509EncodedKeySpec spec = new X509EncodedKeySpec(key.getEncoded());
+        return keyFactory.generatePublic(spec);
+    }
 }

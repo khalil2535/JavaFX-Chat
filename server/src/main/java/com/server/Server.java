@@ -1,5 +1,7 @@
 package com.server;
 
+import com.model.crypto.AES;
+import com.model.crypto.RSA;
 import com.model.messages.Message;
 import com.model.messages.MessageType;
 import com.model.messages.User;
@@ -19,6 +21,7 @@ public class Server {
     private static final HashSet<ObjectOutputStream> writers = new HashSet<>();
     private static final ArrayList<User> users = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final String key = AES.generateKey();
 
     public static void main(String[] args) {
         logger.info("The chat server is running.");
@@ -48,6 +51,7 @@ public class Server {
         private OutputStream os;
         private ObjectOutputStream oos;
         private InputStream is;
+        private String userKey;
 
         public Handler(Socket socket) {
             this.socket = socket;
@@ -62,10 +66,17 @@ public class Server {
                 oos = new ObjectOutputStream(os);
 
                 Message firstMessage = (Message) ois.readObject();
+                this.userKey = firstMessage.getText();
                 checkDuplicateUsername(firstMessage);
+                try {
+                    sendKey(oos);
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                    e.printStackTrace();
+                }
 
                 writers.add(oos);
-                sendNotification(firstMessage);
+                sendNotification(firstMessage.getName(), firstMessage.getPicture());
                 addToList();
 
                 while (socket.isConnected()) {
@@ -82,6 +93,9 @@ public class Server {
                             case STATUS:
                                 changeStatus(inputMsg);
                                 break;
+                            case DISCONNECTED:
+                                closeConnections();
+                                return;
                         }
                     }
                 }
@@ -91,6 +105,14 @@ public class Server {
             } finally {
                 closeConnections();
             }
+        }
+
+        private void sendKey(ObjectOutputStream writer) throws Exception {
+            Message msg = new Message();
+            msg.setText(RSA.encrypt(key, userKey));
+            msg.setType(MessageType.CONNECTED);
+            msg.setName("SERVER");
+            writer.writeObject(msg);
         }
 
         private void changeStatus(Message inputMsg) throws IOException {
@@ -116,13 +138,13 @@ public class Server {
         /**
          * TODO separate send notification and public key
          */
-        private void sendNotification(Message firstMessage) throws IOException {
+        private void sendNotification(String name, String picture) throws IOException {
             Message msg = new Message();
             // TODO use this to send RSA public key to all users
             msg.setText("has joined the chat.");
             msg.setType(MessageType.NOTIFICATION);
-            msg.setName(firstMessage.getName());
-            msg.setPicture(firstMessage.getPicture());
+            msg.setName(name);
+            msg.setPicture(picture);
             sendToAll(msg);
         }
 

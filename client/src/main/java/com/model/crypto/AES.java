@@ -2,13 +2,11 @@ package com.model.crypto;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Base64;
 
 import static com.model.crypto.Util.UTF8;
@@ -36,7 +34,7 @@ public class AES {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
 
         // generate AES Key from String
-        SecretKey secKey = getSecretKey(password);
+        SecretKey secKey = new SecretKeySpec(Base64.getDecoder().decode(password), TYPE);
 
         // init using the secret password and parameters
         cipher.init(Cipher.ENCRYPT_MODE, secKey, new IvParameterSpec(new byte[cipher.getBlockSize()]));
@@ -61,7 +59,7 @@ public class AES {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
 
         // generate AES Key from String
-        SecretKey secKey = getSecretKey(password);
+        SecretKey secKey = new SecretKeySpec(Base64.getDecoder().decode(password), TYPE);
 
         // decode message
         byte[] decodedMsg = Base64.getDecoder().decode(encryptedMsg);
@@ -72,14 +70,6 @@ public class AES {
 
         // return as String
         return new String(decryptedMsg, UTF8);
-    }
-
-    private static SecretKeySpec getSecretKey(String key) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_HASH);
-        byte[] salt = new byte[8];
-        KeySpec spec = new PBEKeySpec(key.toCharArray(), salt, 65536, 256);
-        SecretKey tmp = factory.generateSecret(spec);
-        return new SecretKeySpec(tmp.getEncoded(), TYPE);
     }
 
     public static String generateKey() {

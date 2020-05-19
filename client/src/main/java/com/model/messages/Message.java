@@ -43,26 +43,20 @@ public class Message implements Serializable {
 
     public String getTextDecrypted(String key) {
         String decryptedText = null;
-        if (type == MessageType.USER) {
             try {
-                // TODO use key
-                decryptedText = AES.decrypt(text, "ok");
+                decryptedText = AES.decrypt(text, key);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
         return decryptedText;
     }
 
     public void setTextEncrypted(String text, String key) {
-        if (type == MessageType.USER) {
             try {
-                // TODO use key
-                text = AES.encrypt(text, "ok");
+                text = AES.encrypt(text, key);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
         this.text = text;
     }
 

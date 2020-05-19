@@ -30,8 +30,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.ResourceBundle;
 
@@ -73,7 +73,13 @@ public class LoginController implements Initializable {
         String username = usernameTextField.getText();
         String picture = selectedPicture.getText();
 
-        Client client = new Client(username, picture, Status.ONLINE, port, hostname);
+        Client client = null;
+        try {
+            client = new Client(username, picture, Status.ONLINE, port, hostname);
+        } catch (NoSuchAlgorithmException e) {
+            DialogsUtil.showErrorDialog("Client Error, Couldn't generate key");
+            e.printStackTrace();
+        }
         try {
             client.connect();
 
@@ -85,8 +91,9 @@ public class LoginController implements Initializable {
             this.showScene();
             this.scene = new Scene(window);
 
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             DialogsUtil.showErrorDialog("Could not connect to server\n please check hostname and port");
+            ex.printStackTrace();
         }
     }
 

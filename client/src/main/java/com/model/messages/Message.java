@@ -1,6 +1,7 @@
 package com.model.messages;
 
 import com.model.crypto.AES;
+import com.model.crypto.SHA3;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class Message implements Serializable {
     private ArrayList<User> users;
     private Status status;
     private String picture;
+    private String checkSum;
 
     public Message() {
     }
@@ -43,20 +45,23 @@ public class Message implements Serializable {
 
     public String getTextDecrypted(String key) {
         String decryptedText = null;
-            try {
+        try {
+            if (SHA3.digest(text).equals(checkSum)) {
                 decryptedText = AES.decrypt(text, key);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            } else System.out.println("check sum is not valid for the message");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return decryptedText;
     }
 
     public void setTextEncrypted(String text, String key) {
-            try {
-                text = AES.encrypt(text, key);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            text = AES.encrypt(text, key);
+            checkSum = SHA3.digest(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.text = text;
     }
 
